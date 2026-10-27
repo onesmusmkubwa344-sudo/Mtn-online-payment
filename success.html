@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>MTN Mobile Money · Payment Successful</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mtn-royal: #2059B5;
+    --mtn-deep:  #073A87;
+    --mtn-white: #FFFFFF;
+    --mtn-green: #28A745;
+    --mtn-green-dark: #1E7A3A;
+    --mtn-yellow:#FFCC08;
+    --mtn-text:  #456BA8;
+    --mtn-gray:  #7C8798;
+    --mtn-border:#E5E9F0;
+    --mtn-soft:  #F5F7FB;
+    --mtn-page:  #E7EEF7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--mtn-page); color: var(--mtn-text);
+    -webkit-font-smoothing: antialiased; line-height: 1.45;
+    min-height: 100vh; display: flex; justify-content: center; padding: 0;
+  }
+  .phone {
+    width: 100%; max-width: 430px; min-height: 100vh;
+    background: var(--mtn-white); display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+
+  .toolbar {
+    flex-shrink: 0; background: var(--mtn-white);
+    padding: max(12px, env(safe-area-inset-top, 0px)) 16px 10px;
+    border-bottom: 1px solid var(--mtn-border);
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; z-index: 30;
+  }
+  .tool-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 11px 12px; font-size: 13px; font-weight: 700;
+    border-radius: 10px; font-family: inherit; cursor: pointer;
+    transition: all .15s; border: 1.5px solid transparent;
+  }
+  .tool-outline { background: var(--mtn-white); color: var(--mtn-royal); border-color: #CBD5E1; }
+  .tool-outline:hover { border-color: var(--mtn-royal); background: #F0F5FC; }
+  .tool-outline.copied { background: var(--mtn-green); border-color: var(--mtn-green); color: #fff; }
+  .tool-primary { background: var(--mtn-royal); color: #fff; border-color: var(--mtn-royal); }
+  .tool-primary:hover { filter: brightness(1.08); }
+
+  .top {
+    position: relative; flex-shrink: 0;
+    background: linear-gradient(180deg, var(--mtn-deep) 0%, var(--mtn-royal) 100%);
+    padding: 18px 22px 26px;
+    border-bottom-left-radius: 38% 32px;
+    border-bottom-right-radius: 38% 32px;
+  }
+  .top-row {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 18px; letter-spacing: -0.4px; color: #fff;
+  }
+  .brand .mtn { color: var(--mtn-yellow); }
+  .brand .mm  { color: #FFFFFF; opacity: 0.95; }
+
+  .page-title {
+    margin-top: 22px; font-size: 19px; font-weight: 800;
+    color: #fff; letter-spacing: -0.3px; line-height: 1.25;
+  }
+  .page-sub {
+    margin-top: 6px; font-size: 12.5px; color: rgba(255,255,255,0.78);
+    line-height: 1.5; max-width: 320px;
+  }
+
+  .body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    padding: 24px 22px 24px;
+    display: flex; flex-direction: column;
+  }
+
+  .status-block {
+    text-align: center; margin-bottom: 22px;
+  }
+  .tick {
+    width: 92px; height: 92px; border-radius: 50%;
+    background: var(--mtn-green);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 16px;
+    box-shadow: 0 0 0 8px rgba(40,167,69,0.12),
+                0 10px 26px rgba(40,167,69,0.35);
+    animation: popIn .55s cubic-bezier(.4, 1.4, .6, 1);
+  }
+  .tick svg {
+    width: 48px; height: 48px;
+    stroke: #fff; fill: none;
+    stroke-width: 3.6; stroke-linecap: round; stroke-linejoin: round;
+    stroke-dasharray: 60; stroke-dashoffset: 60;
+    animation: drawCheck .55s ease-out .2s forwards;
+  }
+  @keyframes popIn {
+    0%   { transform: scale(0.4); opacity: 0; }
+    100% { transform: scale(1);   opacity: 1; }
+  }
+  @keyframes drawCheck {
+    to { stroke-dashoffset: 0; }
+  }
+  .status-title {
+    font-size: 21px; font-weight: 800; letter-spacing: -0.4px;
+    color: var(--mtn-text); line-height: 1.3; margin-bottom: 6px;
+  }
+  .status-desc {
+    font-size: 12.5px; color: var(--mtn-gray); line-height: 1.6;
+    max-width: 320px; margin: 0 auto;
+  }
+
+  .amount-block {
+    display: flex; align-items: baseline; justify-content: center; gap: 8px;
+    margin: 4px 0 18px;
+  }
+  .amount-block .cur { font-size: 18px; font-weight: 700; color: var(--mtn-royal); }
+  .amount-block .val {
+    font-size: 40px; font-weight: 800; letter-spacing: -1.5px;
+    color: var(--mtn-deep); line-height: 1;
+  }
+
+  .recipient-line {
+    text-align: center;
+    font-size: 13px; color: var(--mtn-gray); line-height: 1.5;
+    margin-bottom: 22px;
+  }
+  .recipient-line .recv-name {
+    display: block; font-weight: 700; color: var(--mtn-text);
+    font-size: 14.5px; margin-top: 2px; word-break: break-word;
+  }
+
+  .details-panel {
+    width: 100%;
+    background: var(--mtn-soft); border-radius: 12px;
+    padding: 4px 16px; text-align: left;
+    margin-bottom: 20px;
+  }
+  .detail-row {
+    display: flex; justify-content: space-between; align-items: flex-start;
+    gap: 12px; padding: 11px 0;
+    border-bottom: 1px solid #E9EDF4;
+    font-size: 12.5px;
+  }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-row .k { color: var(--mtn-gray); flex-shrink: 0; }
+  .detail-row .v {
+    font-weight: 600; text-align: right;
+    word-break: break-word; color: var(--mtn-text);
+  }
+  .detail-row .v.mono {
+    font-family: "SF Mono", Monaco, "Cascadia Code", monospace;
+    font-size: 11.5px; letter-spacing: 0.3px;
+    background: #fff; padding: 3px 8px; border-radius: 5px;
+    border: 1px solid var(--mtn-border);
+  }
+  .detail-row .v.success { color: var(--mtn-green-dark); font-weight: 800; }
+
+  .mtn-footer {
+    width: 100%; margin-top: 4px;
+    background: var(--mtn-yellow);
+    border-radius: 12px;
+    padding: 14px 16px;
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 12px; text-align: left;
+  }
+  .mtn-footer .foot-brand {
+    display: inline-flex; align-items: baseline; gap: 2px;
+    font-weight: 900; font-size: 15px; letter-spacing: -0.4px; color: #000;
+  }
+  .mtn-footer .foot-brand .mtn { color: #000; }
+  .mtn-footer .foot-brand .mm  { color: #000; opacity: 0.85; }
+  .mtn-footer .foot-support {
+    font-size: 11px; color: #000; line-height: 1.45; font-weight: 600;
+    text-align: right;
+  }
+  .mtn-footer .foot-support strong { font-weight: 800; }
+
+  .close-btn {
+    width: 100%; margin-top: 16px; height: 52px;
+    background: var(--mtn-royal); color: #fff;
+    border: none; border-radius: 999px;
+    font-family: inherit; font-size: 15px; font-weight: 800;
+    letter-spacing: 0.4px;
+    cursor: pointer;
+    box-shadow: 0 10px 24px rgba(32,89,181,0.28);
+    transition: filter .15s, transform .1s;
+  }
+  .close-btn:hover { filter: brightness(1.08); }
+  .close-btn:active { transform: scale(0.99); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #0A0F1F; color: #fff; padding: 11px 18px; border-radius: 9px;
+    font-size: 12.5px; font-weight: 600; opacity: 0; transition: all .3s ease;
+    z-index: 50; pointer-events: none; max-width: 90%; text-align: center;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 380px) {
+    .top { padding: 16px 18px 22px; }
+    .body { padding: 20px 18px 18px; }
+    .brand { font-size: 16px; }
+    .page-title { font-size: 17px; }
+    .tick { width: 78px; height: 78px; }
+    .tick svg { width: 40px; height: 40px; }
+    .status-title { font-size: 19px; }
+    .amount-block .val { font-size: 34px; }
+    .close-btn { height: 48px; font-size: 14px; }
+    .tool-btn { padding: 10px; font-size: 12px; }
+  }
+  @media (min-width: 640px) {
+    body { padding: 32px 0; align-items: center; }
+    .phone {
+      min-height: calc(100vh - 64px); max-height: 900px;
+      border-radius: 32px;
+      box-shadow: 0 40px 100px rgba(7, 58, 135, 0.18);
+      overflow: hidden;
+    }
+    .top { border-top-left-radius: 32px; border-top-right-radius: 32px; }
+  }
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar, .close-btn, .mtn-footer { display: none !important; }
+    .phone { box-shadow: none; }
+    .top { background: #fff; border-bottom: 1px solid #ccc; padding: 12px 0; }
+    .brand .mtn, .brand .mm { color: #000 !important; }
+    .page-title { color: #000; margin-top: 16px; }
+    .page-sub { color: #555; }
+    .tick { box-shadow: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="phone">
+
+  <div class="toolbar">
+    <button class="tool-btn tool-outline" id="copyBtn" onclick="copyReceipt()">
+      <span>📋</span> <span id="copyLbl">Copy Receipt</span>
+    </button>
+    <button class="tool-btn tool-primary" onclick="window.print()">
+      <span>🖨</span> <span id="printLbl">Print</span>
+    </button>
+  </div>
+
+  <div class="top">
+    <div class="top-row">
+      <div class="brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+    </div>
+    <div class="page-title" id="pageTitle">Payment Successful</div>
+    <div class="page-sub" id="pageSub">Your transaction has been approved and the funds have been credited.</div>
+  </div>
+
+  <div class="body">
+
+    <div class="status-block">
+      <div class="tick" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polyline points="5 12 10 17 19 7"/></svg>
+      </div>
+      <div class="status-title" id="statusTitle">Credited Successfully</div>
+      <div class="status-desc" id="statusDesc">Your payment has been approved. A confirmation SMS has been sent to your phone.</div>
+    </div>
+
+    <div class="amount-block">
+      <span class="cur" id="amtCur">—</span>
+      <span class="val" id="amtVal">0.00</span>
+    </div>
+
+    <div class="recipient-line">
+      <span id="recipientLabel">To</span>
+      <span class="recv-name" id="reqRecipient">—</span>
+    </div>
+
+    <div class="details-panel" id="detailsPanel"></div>
+
+    <div class="mtn-footer">
+      <div class="foot-brand"><span class="mtn">MTN</span><span class="mm">&nbsp;Mobile Money</span></div>
+      <div class="foot-support">
+        <span id="needHelpLabel">Need help?</span><br>
+        <span id="callLabel">Call</span> <strong id="supportNum">—</strong>
+      </div>
+    </div>
+
+    <button class="close-btn" onclick="closePage()" id="closeBtn">Close</button>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /* ═══════════════════════════════════════════════════════════
+     TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  const I18N = {
+    en: {
+      docTitle: 'Payment Successful · MTN Mobile Money',
+      copyReceipt: 'Copy Receipt',
+      print: 'Print',
+      copied: 'Copied ✓',
+      copyToast: 'Receipt copied to clipboard.',
+      pageTitle: 'Payment Successful',
+      pageSub: 'Your transaction has been approved and the funds have been credited.',
+      statusTitle: 'Credited Successfully',
+      statusDesc: 'Your payment has been approved. A confirmation SMS has been sent to your phone.',
+      toLabel: 'To',
+      needHelp: 'Need help?',
+      callLabel: 'Call',
+      close: 'Close',
+      kCountry: 'Country',
+      kTransactionId: 'Transaction ID',
+      kTransactionDate: 'Transaction date',
+      kPaymentMethod: 'Payment method',
+      kService: 'Service',
+      kMarketed: 'Marketed',
+      kStatus: 'Status',
+      vCompleted: 'Payment Completed Successfully',
+      receiptTitle: 'MTN Mobile Money — Payment Successful',
+      receiptStatus: 'Status',
+      receiptAmount: 'Amount',
+      receiptRecipient: 'Recipient',
+      receiptCountry: 'Country',
+      receiptTxId: 'Transaction ID',
+      receiptPaymentMethod: 'Payment method',
+      receiptService: 'Service',
+      receiptMarketed: 'Marketed',
+      receiptDate: 'Date'
+    },
+    fr: {
+      docTitle: 'Paiement réussi · MTN Mobile Money',
+      copyReceipt: 'Copier le reçu',
+      print: 'Imprimer',
+      copied: 'Copié ✓',
+      copyToast: 'Reçu copié dans le presse-papiers.',
+      pageTitle: 'Paiement réussi',
+      pageSub: 'Votre transaction a été approuvée et les fonds ont été crédités.',
+      statusTitle: 'Crédité avec succès',
+      statusDesc: 'Votre paiement a été approuvé. Un SMS de confirmation a été envoyé sur votre téléphone.',
+      toLabel: 'À',
+      needHelp: 'Besoin d\'aide ?',
+      callLabel: 'Appelez le',
+      close: 'Fermer',
+      kCountry: 'Pays',
+      kTransactionId: 'ID de transaction',
+      kTransactionDate: 'Date de la transaction',
+      kPaymentMethod: 'Mode de paiement',
+      kService: 'Service',
+      kMarketed: 'Commercialisé par',
+      kStatus: 'Statut',
+      vCompleted: 'Paiement effectué avec succès',
+      receiptTitle: 'MTN Mobile Money — Paiement réussi',
+      receiptStatus: 'Statut',
+      receiptAmount: 'Montant',
+      receiptRecipient: 'Destinataire',
+      receiptCountry: 'Pays',
+      receiptTxId: 'ID de transaction',
+      receiptPaymentMethod: 'Mode de paiement',
+      receiptService: 'Service',
+      receiptMarketed: 'Commercialisé par',
+      receiptDate: 'Date'
+    }
+  };
+
+  const urlParams = new URLSearchParams(location.search);
+  const urlLang = (urlParams.get('lang') || '').toLowerCase();
+  const currentLang = I18N[urlLang] ? urlLang : 'en';
+  const T = I18N[currentLang];
+
+  const tx = {
+    ref: urlParams.get('tx') || '',
+    am:  urlParams.get('am') || '',
+    cur: urlParams.get('cur') || '',
+    rn:  urlParams.get('rn') || '',
+    c:   urlParams.get('c') || '',
+    pm:  urlParams.get('pm') || '',
+    sn:  urlParams.get('sn') || '',
+    mk:  urlParams.get('mk') || '',
+    an:  urlParams.get('an') || '',
+    dt:  urlParams.get('dt') || ''
+  };
+
+  /* ═══════════════════════════════════════════════════════════
+     SUPPORT NUMBERS + CURRENCY LOCALES
+  ═══════════════════════════════════════════════════════════ */
+  const SUPPORT_NUMBERS = {
+    'Cameroon': '8787',
+    'Zambia': '111',
+    'Zambia (MTN)': '111',
+    'Uganda': '100',
+    'Uganda (MTN)': '100',
+    'Ghana': '100',
+    'Ghana (MTN)': '100',
+    'Benin': '111'
+  };
+
+  const CURRENCY_LOCALE = {
+    XAF: 'fr-CM',
+    ZMW: 'en-ZM',
+    UGX: 'en-UG',
+    GHS: 'en-GH',
+    XOF: 'fr-BJ',
+    USD: 'en-US'
+  };
+
+  function formatAmount(amount, currency) {
+    const locale = CURRENCY_LOCALE[currency] || 'en-US';
+    const n = Number(amount);
+    if (!isFinite(n)) return '—';
+    try {
+      const parts = new Intl.NumberFormat(locale, {
+        minimumFractionDigits: 0, maximumFractionDigits: 2
+      }).format(n);
+      const pretty = (currency === 'XAF' || currency === 'XOF' || currency === 'UGX')
+        ? parts.replace(/\u202F|\u00A0|,/g, ' ')
+        : parts;
+      return pretty + ' ' + currency;
+    } catch (e) { return n + ' ' + (currency || ''); }
+  }
+
+  function formatDate(ts) {
+    const d = ts ? new Date(ts) : new Date();
+    const locale = currentLang === 'fr' ? 'fr-FR' : undefined;
+    return d.toLocaleString(locale, {
+      day: '2-digit', month: 'short', year: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     APPLY TRANSLATIONS
+  ═══════════════════════════════════════════════════════════ */
+  function applyTranslations() {
+    document.title = T.docTitle;
+    document.getElementById('copyLbl').textContent = T.copyReceipt;
+    document.getElementById('printLbl').textContent = T.print;
+    document.getElementById('pageTitle').textContent = T.pageTitle;
+    document.getElementById('pageSub').textContent = T.pageSub;
+    document.getElementById('statusTitle').textContent = T.statusTitle;
+    document.getElementById('statusDesc').textContent = T.statusDesc;
+    document.getElementById('recipientLabel').textContent = T.toLabel;
+    document.getElementById('needHelpLabel').textContent = T.needHelp;
+    document.getElementById('callLabel').textContent = T.callLabel;
+    document.getElementById('closeBtn').textContent = T.close;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     RENDER
+  ═══════════════════════════════════════════════════════════ */
+  function render() {
+    applyTranslations();
+
+    /* Amount */
+    document.getElementById('amtCur').textContent = (tx.cur || '').toUpperCase();
+    document.getElementById('amtVal').textContent =
+      tx.am ? formatAmount(tx.am, tx.cur).replace(' ' + tx.cur, '') : '0.00';
+
+    /* Recipient */
+    document.getElementById('reqRecipient').textContent = tx.rn || '—';
+
+    /* Support */
+    document.getElementById('supportNum').textContent =
+      SUPPORT_NUMBERS[tx.c] || '—';
+
+    /* Detail rows */
+    const rows = [
+      { k: T.kCountry,         v: tx.c },
+      { k: T.kTransactionId,   v: tx.ref, mono: true },
+      { k: T.kTransactionDate, v: tx.dt ? formatDate(tx.dt) : formatDate() },
+      { k: T.kPaymentMethod,   v: tx.pm },
+      { k: T.kService,         v: tx.sn },
+      { k: T.kMarketed,        v: tx.mk },
+      { k: T.kStatus,          v: T.vCompleted, cls: 'success' }
+    ];
+
+    let html = '';
+    rows.forEach(r => {
+      if (!r.v && r.v !== 0) return;
+      let vcls = r.mono ? 'mono' : (r.cls || '');
+      html += `<div class="detail-row"><span class="k">${escapeHtml(r.k)}</span><span class="v ${vcls}">${escapeHtml(r.v)}</span></div>`;
+    });
+    document.getElementById('detailsPanel').innerHTML = html;
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+      '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     COPY RECEIPT
+  ═══════════════════════════════════════════════════════════ */
+  function copyReceipt() {
+    const lines = [
+      T.receiptTitle,
+      '=====================================',
+      T.receiptStatus + ': ' + T.vCompleted,
+      T.receiptAmount + ': ' + (tx.am ? formatAmount(tx.am, tx.cur) : '—'),
+      T.receiptRecipient + ': ' + (tx.rn || ''),
+      T.receiptCountry + ': '   + (tx.c || ''),
+      T.receiptTxId + ': ' + (tx.ref || ''),
+      T.receiptPaymentMethod + ': ' + (tx.pm || ''),
+      T.receiptService + ': ' + (tx.sn || ''),
+      T.receiptMarketed + ': ' + (tx.mk || ''),
+      T.receiptDate + ': ' + formatDate(tx.dt)
+    ].join('\n');
+
+    const btn = document.getElementById('copyBtn');
+    const lbl = document.getElementById('copyLbl');
+    const done = () => {
+      btn.classList.add('copied');
+      lbl.textContent = T.copied;
+      showToast(T.copyToast);
+      setTimeout(() => { btn.classList.remove('copied'); lbl.textContent = T.copyReceipt; }, 1800);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(lines).then(done).catch(() => { fallbackCopy(lines); done(); });
+    } else { fallbackCopy(lines); done(); }
+  }
+  function fallbackCopy(text) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) {}
+    document.body.removeChild(ta);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     CLOSE → return to payment link
+  ═══════════════════════════════════════════════════════════ */
+  function closePage() {
+    if (tx.ref) {
+      try {
+        const base = new URL('index.html', window.location.href);
+        base.search = '?r=' + encodeURIComponent(tx.ref) + '&lang=' + encodeURIComponent(currentLang);
+        base.hash = '';
+        window.location.href = base.toString();
+        return;
+      } catch (e) {}
+    }
+    if (history.length > 1) {
+      history.back();
+    } else {
+      window.location.href = 'index.html';
+    }
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closePage();
+  });
+
+  document.addEventListener('DOMContentLoaded', render);
+</script>
+</body>
+</html>
